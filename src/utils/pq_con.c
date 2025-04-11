@@ -37,17 +37,31 @@ const pq_con PQ_CON = {
     }
 };
 
-
-bool known_size(const mp_bitcnt_t n) {
-    switch (n) {
+bool primes_q_p_by_size(mpz_t q, mpz_t p, const mp_bitcnt_t size) {
+    switch (size) {
         case 512:
+            mpz_set_str(q, PQ_CON._512.q, 10);
+            mpz_set_str(p, PQ_CON._512.p, 16);
+            break;
         case 1024:
+            mpz_set_str(q, PQ_CON._1024.q, 10);
+            mpz_set_str(p, PQ_CON._1024.p, 10);
+            break;
         case 1536:
+            mpz_set_str(q, PQ_CON._1536.q, 10);
+            mpz_set_str(p, PQ_CON._1536.p, 10);
+            break;
         case 3840:
+            mpz_set_str(q, PQ_CON._3840.q, 10);
+            mpz_set_str(p, PQ_CON._3840.p, 10);
+            break;
         case 7680:
-            return true;
+            mpz_set_str(q, PQ_CON._7680.q, 10);
+            mpz_set_str(p, PQ_CON._7680.p, 10);
+            break;
         default:
             return false;
     }
+    return true;
 }
 
