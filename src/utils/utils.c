@@ -107,3 +107,7 @@ void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const 
     }
     mpz_clears(temp.value, two, NULL);
 }
+
+float timer() {
+    return (float) clock() / CLOCKS_PER_SEC;
+}
