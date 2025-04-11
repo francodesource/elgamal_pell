@@ -6,3 +6,4 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -O3")
 
 add_executable(elgamal_piso main.c)
 target_link_libraries(elgamal_piso gmp)
+set_target_properties(elgamal_piso PROPERTIES UNITY_BUILD ON)
