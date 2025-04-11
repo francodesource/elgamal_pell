@@ -66,3 +66,42 @@ void rand_prime_q_p(mpz_t q, mpz_t p, gmp_randstate_t state, const mp_bitcnt_t b
         mpz_sub_ui(q, q, 1);
     } while (mpz_probab_prime_p(q, 15) == 0);
 }
+
+/**
+* Stores in rop the smallest non-square mod q
+* @param rop stores the result, must be already initialized
+* @param q the modulus, must be already initialized
+*/
+void smallest_non_square(mpz_t rop, const mpz_t q) {
+    mpz_set_ui(rop, 2);
+    while (mpz_jacobi(rop, q) != -1) {
+        mpz_add_ui(rop, rop, 1);
+    }
+}
+/**
+* Stores in rop a random generator of order q + 1.
+* All parameters must be already initialized.
+*
+* @param rop stores the result
+* @param state the random state
+* @param d the d parameter of the hyperbola
+* @param q a prime number such that q = 2*p + 1
+* @param p a prime number
+*/
+void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const mpz_t q, const mpz_t p) {
+    mpz_t temp, two;
+    mpz_inits(temp, two, NULL);
+    mpz_set_ui(two, 2);
+    while (1){
+        rand_range_ui(rop, state, 2, q);
+        params_modified_more(temp, rop, two, d, q);
+        const int cond_1 = mpz_cmp_si(temp, ALPHA);
+        params_modified_more(temp, rop, p, d, q);
+        const int cond_2 = mpz_cmp_si(temp, ALPHA);
+
+        if (cond_1 != 0 && cond_2 != 0) {
+            break;
+        }
+    }
+    mpz_clears(temp, two, NULL);
+}
