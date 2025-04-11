@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <gmp.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "src/keys.c"
-
+#include "src/params.c"
 int main(void) {
     public_key public_key;
     mpz_t n, q, d, g, h;
