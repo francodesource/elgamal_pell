@@ -18,6 +18,10 @@ void public_key_from(public_key *pk, mpz_t q, mpz_t d, mpz_t g, mpz_t h){
     pk->h = mpz_get_str(NULL, 16, h);
 }
 
+void public_key_print(public_key pk) {
+    printf("Public Key:\nq: %s\nd: %s\ng: %s\nh: %s\n", pk.q, pk.d, pk.g, pk.h);
+}
+
 void secret_key_from(secret_key *sk, mpz_t n){
     *sk = mpz_get_str(NULL, 16, n);
 }
