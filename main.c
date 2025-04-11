@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "src/utils/utils.c"
 #include "src/keys.c"
 #include "src/params.c"
 int main(void) {
