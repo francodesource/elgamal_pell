@@ -109,3 +109,13 @@ void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const 
     }
     mpz_clears(temp.value, two, NULL);
 }
+
+float min(const float * vec,const int size) {
+    float min = vec[0];
+    for (int i = 1; i < size; ++i) {
+        if (vec[i] < min) {
+            min = vec[i];
+        }
+    }
+    return min;
+}
