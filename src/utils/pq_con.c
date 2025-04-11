@@ -2,8 +2,8 @@
 // Created by fvfra on 11/04/2025.
 //
 typedef struct {
-    char * q;
     char * p;
+    char * q;
 } pq;
 
 typedef struct {
@@ -41,7 +41,7 @@ bool primes_q_p_by_size(mpz_t q, mpz_t p, const mp_bitcnt_t size) {
     switch (size) {
         case 512:
             mpz_set_str(q, PQ_CON._512.q, 10);
-            mpz_set_str(p, PQ_CON._512.p, 16);
+            mpz_set_str(p, PQ_CON._512.p, 10);
             break;
         case 1024:
             mpz_set_str(q, PQ_CON._1024.q, 10);

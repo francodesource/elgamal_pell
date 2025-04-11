@@ -2,6 +2,10 @@
 // Created by fvfra on 11/04/2025.
 //
 
+float timer() {
+    return (float) clock() / CLOCKS_PER_SEC;
+}
+
 /**
  *  Stores in rop a generated pseudo-random number within given range [min, max)
  *  all parameters must be already initialized
@@ -91,7 +95,6 @@ void smallest_non_square(mpz_t rop, const mpz_t q) {
 void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const mpz_t q, const mpz_t p) {
     param_t temp;
     param_init(&temp);
-
     mpz_t two;
     mpz_init_set_ui(two, 2);
     while (1){
@@ -100,14 +103,9 @@ void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const 
         const bool cond_1 = temp.inf;
         mod_more_mpz(&temp, rop, p, d, q);
         const bool cond_2 = temp.inf;
-
-        if (cond_1 != 0 && cond_2 != 0) {
+        if (!cond_1 && !cond_2) {
             break;
         }
     }
     mpz_clears(temp.value, two, NULL);
-}
-
-float timer() {
-    return (float) clock() / CLOCKS_PER_SEC;
 }

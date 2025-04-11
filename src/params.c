@@ -8,6 +8,7 @@ typedef struct {
 } param_t;
 
 void param_init(param_t * op) {
+    op->inf = false;
     mpz_init(op->value);
 }
 
@@ -123,8 +124,8 @@ void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, co
             mpz_mod(D, D, q);
         }
     }
-    // store in Nt gcd and in Dt the inverse of D
     mpz_gcdext(Nt, Dt, temp, D, q);
+    mpz_mod(Dt, Dt, q);
 
     if (mpz_cmp_ui(Nt, 1) == 0) {
         rop->inf = false;
@@ -136,7 +137,6 @@ void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, co
     } else {
         param_set_inf(rop);
     }
-
     mpz_clears(N, D, Nt, Dt, NULL);
 }
 
