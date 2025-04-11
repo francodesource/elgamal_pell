@@ -89,19 +89,21 @@ void smallest_non_square(mpz_t rop, const mpz_t q) {
 * @param p a prime number
 */
 void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const mpz_t q, const mpz_t p) {
-    mpz_t temp, two;
-    mpz_inits(temp, two, NULL);
-    mpz_set_ui(two, 2);
+    param_t temp;
+    param_init(&temp);
+
+    mpz_t two;
+    mpz_init_set_ui(two, 2);
     while (1){
         rand_range_ui(rop, state, 2, q);
-        params_modified_more(temp, rop, two, d, q);
-        const int cond_1 = mpz_cmp_si(temp, ALPHA);
-        params_modified_more(temp, rop, p, d, q);
-        const int cond_2 = mpz_cmp_si(temp, ALPHA);
+        mod_more_mpz(&temp, rop, two, d, q);
+        const bool cond_1 = temp.inf;
+        mod_more_mpz(&temp, rop, p, d, q);
+        const bool cond_2 = temp.inf;
 
         if (cond_1 != 0 && cond_2 != 0) {
             break;
         }
     }
-    mpz_clears(temp, two, NULL);
+    mpz_clears(temp.value, two, NULL);
 }

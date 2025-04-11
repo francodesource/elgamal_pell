@@ -3,7 +3,7 @@
 //
 
 typedef struct {
-    bool inf = false;
+    bool inf;
     mpz_t value;
 } param_t;
 
