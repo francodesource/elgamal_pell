@@ -48,7 +48,7 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
     // returning the key as hex strings
     keys res;
-    public_key_from(&res.pk, q, d, g, h.value);
+    public_key_from(&res.pk, q, d, g, h);
     secret_key_from(&res.sk, sk);
     return res;
 

@@ -7,8 +7,8 @@
 #include <unistd.h>
 
 #include "results/location.c"
-#include "src/keys.c"
 #include "src/params.c"
+#include "src/keys.c"
 #include "src/utils/utils.c"
 #include "src/utils/pq_con.c"
 #include "src/utils/tonelli_shanks.c"
@@ -16,8 +16,8 @@
 #include "src/gen.c"
 #include "src/enc.c"
 
-# define SIZE 7680
-# define ITER 100
+# define SIZE 512
+# define ITER 10
 
 int main(void) {
     // initializing the random state

@@ -92,8 +92,8 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     }
 
     const ciphertext ct = {
-        .c1 = param_get_str(&c1),
-        .c2 = param_get_str(&c2),
+        .c1 = param_get_str(c1),
+        .c2 = param_get_str(c2),
         .d  = mpz_get_str(NULL, 16, d1)
     };
 

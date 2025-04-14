@@ -11,11 +11,11 @@ typedef struct {
 
 typedef char* secret_key;
 
-void public_key_from(public_key *pk, mpz_t q, mpz_t d, mpz_t g, mpz_t h){
+void public_key_from(public_key *pk, mpz_t q, mpz_t d, mpz_t g, param_t h){
     pk->q = mpz_get_str(NULL, 16, q);
     pk->d = mpz_get_str(NULL, 16, d);
     pk->g = mpz_get_str(NULL, 16, g);
-    pk->h = mpz_get_str(NULL, 16, h);
+    pk->h = param_get_str(h);
 }
 
 void public_key_print(public_key pk) {

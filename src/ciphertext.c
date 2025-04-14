@@ -8,9 +8,9 @@ typedef struct {
     char * d;
 } ciphertext;
 
-void chiphertext_from(ciphertext *ct, mpz_t c1, mpz_t c2, mpz_t d){
-    ct->c1 = mpz_get_str(NULL, 16, c1);
-    ct->c2 = mpz_get_str(NULL, 16, c2);
+void chiphertext_from(ciphertext *ct, param_t c1, param_t c2, mpz_t d){
+    ct->c1 = param_get_str(c1);
+    ct->c2 = param_get_str(c2);
     ct->d = mpz_get_str(NULL, 16, d);
 }
 

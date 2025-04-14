@@ -12,11 +12,11 @@ void param_init(param_t * op) {
     mpz_init(op->value);
 }
 
-char* param_get_str(const param_t *param) {
-    if (param->inf) {
+char* param_get_str(const param_t param) {
+    if (param.inf) {
         return "inf";
     }
-    return mpz_get_str(NULL, 16, param->value);
+    return mpz_get_str(NULL, 16, param.value);
 }
 
 void param_set_inf(param_t *param) {
