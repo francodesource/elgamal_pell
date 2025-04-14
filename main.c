@@ -13,8 +13,10 @@
 #include "src/utils/pq_con.c"
 #include "src/utils/tonelli_shanks.c"
 #include "src/ciphertext.c"
+
 #include "src/gen.c"
 #include "src/enc.c"
+#include "src/dec.c"
 
 # define SIZE 512
 # define ITER 10
@@ -33,7 +35,16 @@ int main(void) {
     mpz_t msg, res;
     mpz_inits(msg, res, NULL);
     mpz_set_str(msg, "123456", 10);
+    gmp_printf("Encrypting now message: %Zd\n", msg);
     ciphertext ct = enc(msg, ks.pk, state, ITER);
     ciphertext_print(ct);
+
+    dec(res, ct, ks.pk, ks.sk, ITER);
+    gmp_printf("Decrypted message: %Zd\n", res);
+
+    if (mpz_cmp(msg, res) != 0) {
+        perror("elgamal piso failed :(\n");
+    }
+
     return 0;
 }
