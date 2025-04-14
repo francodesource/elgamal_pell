@@ -14,6 +14,7 @@
 #include "src/utils/tonelli_shanks.c"
 #include "src/ciphertext.c"
 #include "src/gen.c"
+#include "src/enc.c"
 
 
 int main(void) {
@@ -22,10 +23,16 @@ int main(void) {
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
 
-    keys ks = gen(7680, 10, state);
+    keys ks = gen(512, 10, state);
 
     public_key_print(ks.pk);
     printf("Secret key: %s\n", ks.sk);
     printf("Results folder: %s\n", results_folder_location());
+
+    mpz_t msg, res;
+    mpz_inits(msg, res, NULL);
+    mpz_set_str(msg, "123456", 10);
+    ciphertext ct = enc(msg, ks.pk, state, 10);
+    ciphertext_print(ct);
     return 0;
 }
