@@ -12,6 +12,7 @@
 #include "src/utils/utils.c"
 #include "src/utils/pq_con.c"
 #include "src/utils/tonelli_shanks.c"
+#include "src/ciphertext.c"
 #include "src/gen.c"
 
 
@@ -21,7 +22,7 @@ int main(void) {
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
 
-    keys ks = gen(7680, 100, state);
+    keys ks = gen(7680, 10, state);
 
     public_key_print(ks.pk);
     printf("Secret key: %s\n", ks.sk);

@@ -24,7 +24,6 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
         // measuring time for parameter generation
         float start = timer();
         smallest_non_square(d, q);
-
         rand_primitive_root(g, state, d, q, p);
         t_par[i] = timer() - start;
 
