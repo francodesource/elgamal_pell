@@ -157,3 +157,28 @@ void mod_more(param_t * rop, const param_t * m, mpz_t e, const mpz_t d, const mp
     // Here we know that m is not inf
     mod_more_mpz(rop, m->value, e, d, q);
 }
+
+void param_coord(mpz_t x, mpz_t y, const param_t * m, const mpz_t d, const mpz_t mod) {
+    if (m->inf) {
+        mpz_set_ui(x,1);
+        mpz_set_ui(y,1);
+        return;
+    }
+
+    mpz_t m_sqr;
+    mpz_init(m_sqr);
+    mpz_powm_ui(m_sqr, m->value, 2, mod);
+    mpz_add(x, m_sqr, d);
+    // from now on I store in m_sqrt (m^2 - d)^-1
+    mpz_sub(m_sqr, m_sqr, d);
+    mpz_invert(m_sqr, m_sqr, mod);
+
+    mpz_mul(x, x, m_sqr);
+    mpz_mod(x, x, mod);
+
+    mpz_mul_ui(y, m->value, 2);
+    mpz_mul(y, y,m_sqr);
+    mpz_mod(y, y, mod);
+
+    mpz_clear(m_sqr);
+}
