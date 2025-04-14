@@ -35,7 +35,6 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
         t_mul[i] = timer() - start;
     }
 
-    // TODO: writing to file...
     char filepath[100];
     char * result_folder = results_folder_location();
     sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
