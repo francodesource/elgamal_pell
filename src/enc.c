@@ -78,6 +78,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
 
         mod_more_mpz(&c1, g, r, d1, q);
         mod_more_mpz(&c2, h, r, d1, q);
+        param_op_mpz(&c2, m, d1, q);
         t_enc[i] = timer() - start; // getting time
     }
 
