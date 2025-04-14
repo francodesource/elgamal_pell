@@ -11,6 +11,7 @@
 #include "src/params.c"
 #include "src/utils/utils.c"
 #include "src/utils/pq_con.c"
+#include "src/utils/tonelli_shanks.c"
 #include "src/gen.c"
 
 
