@@ -16,6 +16,8 @@
 #include "src/gen.c"
 #include "src/enc.c"
 
+# define SIZE 7680
+# define ITER 100
 
 int main(void) {
     // initializing the random state
@@ -23,16 +25,15 @@ int main(void) {
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
 
-    keys ks = gen(512, 10, state);
+    keys ks = gen(SIZE, ITER, state);
 
     public_key_print(ks.pk);
     printf("Secret key: %s\n", ks.sk);
-    printf("Results folder: %s\n", results_folder_location());
 
     mpz_t msg, res;
     mpz_inits(msg, res, NULL);
     mpz_set_str(msg, "123456", 10);
-    ciphertext ct = enc(msg, ks.pk, state, 10);
+    ciphertext ct = enc(msg, ks.pk, state, ITER);
     ciphertext_print(ct);
     return 0;
 }

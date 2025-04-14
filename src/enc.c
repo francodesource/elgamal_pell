@@ -82,7 +82,13 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     }
 
     if (t > 1) {
-        // TODO: write to file
+        char filepath[100];
+        sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), q_bits, t);
+        FILE *fp = fopen(filepath, "a");
+
+        fprintf(fp, "*** Enc(%ld, %d) ***\n", q_bits, t);
+        fprintf(fp, "time(enc)%f\n", min(t_enc, t));
+        fclose(fp);
     }
 
     const ciphertext ct = {
