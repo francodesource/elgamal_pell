@@ -47,7 +47,9 @@ int param_invert(param_t *rop, const param_t *op, const mpz_t mod) {
         return 1;
     }
     rop->inf = false;
-    return mpz_invert(rop->value, op->value, mod);
+    mpz_neg(rop->value, op->value);
+    mpz_mod(rop->value, rop->value, mod);
+    return 1;
 }
 
 void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t d, const mpz_t q) {
@@ -66,7 +68,7 @@ void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t
         mpz_invert(sum, sum, q);
         mpz_mul(rop->value, m1->value, m2);
         mpz_add(rop->value, rop->value, d);
-        mpz_mul(rop->value, rop->value, d);
+        mpz_mul(rop->value, rop->value, sum);
         mpz_mod(rop->value, rop->value, q);
 
     } else {
@@ -161,7 +163,7 @@ void mod_more(param_t * rop, const param_t * m, mpz_t e, const mpz_t d, const mp
 void param_coord(mpz_t x, mpz_t y, const param_t * m, const mpz_t d, const mpz_t mod) {
     if (m->inf) {
         mpz_set_ui(x,1);
-        mpz_set_ui(y,1);
+        mpz_set_ui(y,0);
         return;
     }
 

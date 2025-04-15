@@ -29,7 +29,8 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
         // measuring time for exponentiation
         start = timer();
-        rand_range_ui(sk, state, 2, q);
+        //rand_range_ui(sk, state, 2, q);
+        /*DEBUG*/ mpz_set_str(sk, "23ae5a930ff47f02e7f0c698682ba980a7e5f3d4a7609e69a327ca8e031509755f3a5fc1f6cdf2c944ccbde5102268bec27caec16516311020aafa03c167e957", 16);
         mod_more_mpz(&h, g, sk, d, q);
         t_mul[i] = timer() - start;
     }

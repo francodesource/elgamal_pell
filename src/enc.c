@@ -22,7 +22,8 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     for (int i = 0; i < t; i++) {
         float start = timer();
         // splitting message in two coordinates
-        mpz_tdiv_q_2exp(x, x, q_bits - 1);
+        mpz_tdiv_q_2exp(x, msg, q_bits - 1);
+        printf("x: %s\n", mpz_get_str(NULL, 2, x));
         // padding the message
         mpz_mul_2exp(x, x, pad);
         // finding a suitable d
@@ -37,6 +38,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
             }
             mpz_add_ui(x, x, 1);
         }
+
         // exit the program if no suitable d is found
         if (!found) {
             perror("Error: non square d found\n");
@@ -44,7 +46,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         }
         // setting y
         mpz_tdiv_r_2exp(y, msg, q_bits - 1);
-        if (mpz_invert(tmp, y, q) == 0) {
+        if (mpz_invert(y, y, q) == 0) { // y <- y^-1
             gmp_fprintf(
                 stderr,
                 "Error: y (%Zd) is not invertible\n",
@@ -52,19 +54,26 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
                 );
             exit(EXIT_FAILURE);
         }
+        printf("y: %s\n", mpz_get_str(NULL, 2, y));
+        //  setting d
+        mpz_powm_ui(tmp, y, 2, q); // tmp <- y^2
+        mpz_mul(d1, d1, tmp);
+        mpz_mod(d1, d1, q); // d1 <- (x^2 - 1) / y^2
+        gmp_printf("ct.d %Zx\n", d1);
+
         // setting m
         mpz_add_ui(m, x, 1);
         mpz_mul(m, m, y);
         mpz_mod(m, m, q);
+        gmp_printf("m: %Zx\n", m);
         // setting random exponent r
-        rand_range_ui(r, state, 2, q);
-        // setting s
-        mpz_pow_ui(tmp, tmp, 2);
-        mpz_mul(d1, d1, tmp);
-        mpz_mod(d1, d1, q);
+        //rand_range_ui(r, state, 2, q);
+        /*DEBUG*/ mpz_set_str(r, "2438738743", 10);
 
-        mpz_invert(tmp, d, q);
-        mpz_mul(tmp, d, d1);
+        // setting s
+
+        mpz_invert(d, d, q);
+        mpz_mul(tmp, d, d1); // tmp <- d^-1 * d1
         mpz_mod(tmp, tmp, q);
 
         sqrt_m(s, tmp, q);
@@ -78,7 +87,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
 
         mod_more_mpz(&c1, g, r, d1, q);
         mod_more_mpz(&c2, h, r, d1, q);
-        param_op_mpz(&c2, m, d1, q);
+        param_op_mpz(&c2, &c2, m, d1, q);
         t_enc[i] = timer() - start; // getting time
     }
 
