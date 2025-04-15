@@ -85,7 +85,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         param_op_mpz(&c2, &c2, m, d1, q);
         t_enc[i] = timer() - start; // getting time
     }
-
+    // printing file only for more than one iteration
     if (t > 1) {
         char filepath[100];
         sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), q_bits, t);

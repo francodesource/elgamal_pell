@@ -34,17 +34,21 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
         t_mul[i] = timer() - start;
     }
 
-    char filepath[100];
-    char * result_folder = results_folder_location();
-    sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
-    // cleaning file
-    FILE *fp = fopen(filepath, "w");
-    fprintf(fp, "%s", "");
-    fclose(fp);
-    // writing to file
-    fp = fopen(filepath, "a");
-    fprintf(fp, "*** Gen(%ld, %d) ***\ntime(par)%f\ntime(mul)%f\n", n, t, min(t_par, t), min(t_mul, t));
-    fclose(fp);
+    // printing time on file only for more than one iteration
+    if (t > 1) {
+        printf("Simao nella sezione di creazione file\n");
+        char filepath[100];
+        char * result_folder = results_folder_location();
+        sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
+        // cleaning file
+        FILE *fp = fopen(filepath, "w");
+        fprintf(fp, "%s", "");
+        fclose(fp);
+        // writing to file
+        fp = fopen(filepath, "a");
+        fprintf(fp, "*** Gen(%ld, %d) ***\ntime(par)%f\ntime(mul)%f\n", n, t, min(t_par, t), min(t_mul, t));
+        fclose(fp);
+    }
 
     // returning the key as hex strings
     keys res;

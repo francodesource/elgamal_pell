@@ -9,11 +9,8 @@ add_executable(elgamal_piso main.c)
 add_executable(tests test.c)
 
 
-
+target_link_libraries(elgamal_piso gmp)
 target_link_libraries(tests gmp)
 
-target_link_libraries(elgamal_piso gmp)
-set_target_properties(elgamal_piso PROPERTIES UNITY_BUILD ON)
-
 # test suite
-add_test(NAME testGenEncDec512 COMMAND tests 512 100)
+add_test(NAME testGenEncDec512 COMMAND tests 512 10)

@@ -26,14 +26,14 @@
  * This file is used for testing
  */
 
-int test_gen_enc_dec_size_iter(int size, int iter) {
+int test_gen_enc_dec_size_iter(int size) {
     gmp_randstate_t state;
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
     mpz_t msg, res;
     mpz_inits(msg, res, NULL);
 
-    const keys ks = gen(size, iter, state);
+    const keys ks = gen(size, 1, state);
     // initializing message to a number with size bigger than q
     mpz_rrandomb(msg, state, size);
     const ciphertext ct = enc(msg, ks.pk, state, 1);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     const int iter = atoi(argv[2]);
 
     for (int i = 0; i < iter; i++) {
-        if (test_gen_enc_dec_size_iter(size, iter) != 0) {
+        if (test_gen_enc_dec_size_iter(size) != 0) {
             fprintf(stderr, "Test failed for size %d and iter %d\n", size, iter);
             return 1;
         }
