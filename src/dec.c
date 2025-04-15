@@ -25,12 +25,8 @@ void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _
         param_op(&m, &c1, &c2, d1, q); // (-c1^sk) * c2
         // this should be inf
         param_coord(x, y, &m, d1, q);
-        gmp_printf("y: %Zd\n", y);
-        gmp_printf("x: %Zd\n", x);
         mpz_tdiv_q_2exp(x, x, pad);
-        gmp_printf("x: %Zd\n", x);
         mpz_mul_2exp(rop, x, n - 1);
-        gmp_printf("x: %Zd\n", x);
 
         mpz_add(rop, rop, y);
         t_dec[i] = mpz_get_d(rop);

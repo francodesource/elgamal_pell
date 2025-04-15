@@ -23,7 +23,6 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         float start = timer();
         // splitting message in two coordinates
         mpz_tdiv_q_2exp(x, msg, q_bits - 1);
-        printf("x: %s\n", mpz_get_str(NULL, 2, x));
         // padding the message
         mpz_mul_2exp(x, x, pad);
         // finding a suitable d
@@ -54,21 +53,17 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
                 );
             exit(EXIT_FAILURE);
         }
-        printf("y: %s\n", mpz_get_str(NULL, 2, y));
         //  setting d
         mpz_powm_ui(tmp, y, 2, q); // tmp <- y^2
         mpz_mul(d1, d1, tmp);
         mpz_mod(d1, d1, q); // d1 <- (x^2 - 1) / y^2
-        gmp_printf("ct.d %Zx\n", d1);
 
         // setting m
         mpz_add_ui(m, x, 1);
         mpz_mul(m, m, y);
         mpz_mod(m, m, q);
-        gmp_printf("m: %Zx\n", m);
         // setting random exponent r
-        //rand_range_ui(r, state, 2, q);
-        /*DEBUG*/ mpz_set_str(r, "2438738743", 10);
+        rand_range_ui(r, state, 2, q);
 
         // setting s
 
