@@ -36,7 +36,6 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
     // printing time on file only for more than one iteration
     if (t > 1) {
-        printf("Simao nella sezione di creazione file\n");
         char filepath[100];
         char * result_folder = results_folder_location();
         sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
@@ -54,6 +53,11 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
     keys res;
     public_key_from(&res.pk, q, d, g, h);
     secret_key_from(&res.sk, sk);
+
+    // freeing memory
+    mpz_clears(g, q, p, d, sk, NULL);
+    param_clears(&h, NULL);
+
     return res;
 
 }

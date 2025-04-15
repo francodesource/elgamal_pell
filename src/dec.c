@@ -5,11 +5,8 @@
 void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _sk, int t) {
     mpz_t x, y, d1, q, sk;
     param_t c1, c2, m;
-    //TODO create variadic function to init multiple params
-    param_init(&c1);
-    param_init(&c2);
-    param_init(&m);
 
+    param_inits(&c1, &c2, &m, NULL);
     mpz_inits(x, y, d1, q, sk, NULL);
 
     ciphertext_set(&c1, &c2, d1, ct);
@@ -35,5 +32,5 @@ void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _
     //TODO write to file
 
     mpz_clears(x, y, d1, q, sk, NULL);
-    //TODO free params
+    param_clears(&c1, &c2, &m, NULL);
 }

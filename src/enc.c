@@ -103,6 +103,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     };
 
     // freeing memory
-    mpz_clears(q, d, d1, g, h, x, m, s, r, tmp, c1.value, c2.value, NULL);
+    mpz_clears(q, d, d1, g, h, x, m, s, r, tmp, NULL);
+    param_clears(&c1, &c2, NULL);
     return ct;
 }

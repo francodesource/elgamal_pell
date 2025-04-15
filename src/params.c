@@ -1,6 +1,7 @@
 //
 // Created by fvfra on 11/04/2025.
 //
+#include <stdarg.h>
 
 typedef struct {
     bool inf;
@@ -11,6 +12,29 @@ void param_init(param_t * op) {
     op->inf = false;
     mpz_init(op->value);
 }
+
+void param_inits(param_t * first, ...) {
+    va_list args;
+    va_start(args, first);
+
+    param_t * current = first;
+    while (current != NULL) {
+        param_init(current);
+        current = va_arg(args, param_t*);
+    }
+}
+
+void param_clears(param_t * first, ...) {
+    va_list args;
+    va_start(args, first);
+
+    param_t * current = first;
+    while (current != NULL) {
+        mpz_clear(current->value);
+        current = va_arg(args, param_t*);
+    }
+}
+
 
 char* param_get_str(const param_t param) {
     if (param.inf) {
