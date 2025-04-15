@@ -45,6 +45,13 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         }
         // setting y
         mpz_tdiv_r_2exp(y, msg, q_bits - 1);
+        mpz_add_ui(y, y, 1);
+
+        // (??????????)
+        // aggiungo uno a y cosí é sempre diverso da zero e posso invertirlo altrimenti
+        // l'algoritmo crasha per messaggi del tipo 110000...000
+        // bisogna sottrarre uno anche in fase di decryption
+
         if (mpz_invert(y, y, q) == 0) { // y <- y^-1
             gmp_fprintf(
                 stderr,

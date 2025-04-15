@@ -35,11 +35,14 @@ int test_gen_enc_dec_size_iter(int size) {
 
     const keys ks = gen(size, 1, state);
     // initializing message to a number with size bigger than q
-    mpz_rrandomb(msg, state, size);
+    const int pad = size / 16;
+    const int max_bits = 2 * (size - 1) - pad;
+    mpz_rrandomb(msg, state, max_bits);
     const ciphertext ct = enc(msg, ks.pk, state, 1);
     dec(res, ct, ks.pk, ks.sk, 1);
 
     if (mpz_cmp(res, msg) != 0) {
+        fprintf(stderr, "Error: message is not equal to message\n");
         return 1;
     }
 
