@@ -34,7 +34,7 @@ void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _
         char filepath[100];
         sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), n, t);
         FILE * file =  fopen(filepath, "a");
-        fprintf(file, "*** Dec ***\ntime(dec) %f\n", min(t_dec, t));
+        fprintf(file, "*** Dec(%ld, %d) ***\ntime(dec)\t%f\n\n",n, t, min(t_dec, t));
         fclose(file);
     }
     mpz_clears(x, y, d1, q, sk, NULL);

@@ -18,8 +18,10 @@
 #include "src/enc.c"
 #include "src/dec.c"
 
-# define SIZE 512
-# define ITER 10
+// Modify these parameters to test differets sizes and iterations
+#define SIZE 7680
+#define ITER 10
+#define MSG "123456"
 
 int main(void) {
     // initializing the random state

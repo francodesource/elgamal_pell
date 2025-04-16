@@ -100,7 +100,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         FILE *fp = fopen(filepath, "a");
 
         fprintf(fp, "*** Enc(%ld, %d) ***\n", q_bits, t);
-        fprintf(fp, "time(enc)%f\n", min(t_enc, t));
+        fprintf(fp, "time(enc)\t%f\n", min(t_enc, t));
         fclose(fp);
     }
 
