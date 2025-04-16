@@ -35,8 +35,8 @@ int test_gen_enc_dec_size_iter(int size) {
 
     const keys ks = gen(size, 1, state);
     // initializing message to a number with size bigger than q
-    const int pad = size / 16;
-    const int max_bits = 2 * (size - 1) - pad;
+    const unsigned long pad = padding(size);
+    const unsigned long max_bits = 2 * (size - 1) - pad -1;
     mpz_rrandomb(msg, state, max_bits);
     const ciphertext ct = enc(msg, ks.pk, state, 1);
     dec(res, ct, ks.pk, ks.sk, 1);

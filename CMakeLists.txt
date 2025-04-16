@@ -13,7 +13,9 @@ target_link_libraries(elgamal_piso gmp)
 target_link_libraries(tests gmp)
 
 # test suite
-# TODO: add some tests for smaller sizes (require bigger padding)
+# unknown sizes
+add_test(NAME testGenEncDec128 COMMAND tests 128 1000)
+add_test(NAME testGenEncDec256 COMMAND tests 256 1000)
 
 # known sizes
 add_test(NAME testGenEncDec512 COMMAND tests 512 1000)
