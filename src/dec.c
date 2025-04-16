@@ -4,7 +4,7 @@
 
 void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _sk, int t) {
     mpz_t x, y, d1, q, sk;
-    param_t c1, c2, m;
+    param_t c1, c2, m; // c1 and c2 must  not be modified inside the loop
 
     param_inits(&c1, &c2, &m, NULL);
     mpz_inits(x, y, d1, q, sk, NULL);
@@ -17,20 +17,26 @@ void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _
 
     float t_dec[t];
     for (int i = 0; i < t; i++) {
-        mod_more(&c1, &c1, sk, d1, q);
-        param_invert(&c1, &c1, q);
-        param_op(&m, &c1, &c2, d1, q); // (-c1^sk) * c2
+        float start = timer();
+        mod_more(&m, &c1, sk, d1, q);
+        param_invert(&m, &m, q);
+        param_op(&m, &m, &c2, d1, q); // (-c1^sk) * c2
 
         param_coord(x, y, &m, d1, q);
         mpz_tdiv_q_2exp(x, x, pad);
         mpz_mul_2exp(rop, x, n - 1);
         mpz_sub_ui(y, y, 1);
         mpz_add(rop, rop, y);
-        t_dec[i] = mpz_get_d(rop);
+
+        t_dec[i] = timer() - start;
     }
-
-    //TODO write to file
-
+    if (t > 1) {
+        char filepath[100];
+        sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), n, t);
+        FILE * file =  fopen(filepath, "a");
+        fprintf(file, "*** Dec ***\ntime(dec) %f\n", min(t_dec, t));
+        fclose(file);
+    }
     mpz_clears(x, y, d1, q, sk, NULL);
     param_clears(&c1, &c2, &m, NULL);
 }

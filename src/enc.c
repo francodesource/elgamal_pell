@@ -8,7 +8,8 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     param_t c1, c2;
     param_init(&c1);
     param_init(&c2);
-    public_key_set(q, d, g, h, pk); // converting form hexadecimal to mpz_t
+    // q, d, g, h must not be modified inside the loop
+    public_key_set(q, d, g, h, pk); // converting from hexadecimal to mpz_t
     // computing padding value
     unsigned long q_bits = mpz_sizeinbase(q, 2);
     unsigned long pad = q_bits / 16;
@@ -74,22 +75,22 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
 
         // setting s
 
-        mpz_invert(d, d, q);
-        mpz_mul(tmp, d, d1); // tmp <- d^-1 * d1
+        mpz_invert(tmp, d, q);
+        mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
         mpz_mod(tmp, tmp, q);
 
         sqrt_m(s, tmp, q);
 
         // setting c1 & c2
-        mpz_mul(g, g, s);
-        mpz_mod(g, g, q);
+        mpz_mul(tmp, g, s);
+        mpz_mod(tmp, tmp, q);
+        mod_more_mpz(&c1, tmp, r, d1, q);
 
-        mpz_mul(h, h, s);
-        mpz_mod(h, h, q);
-
-        mod_more_mpz(&c1, g, r, d1, q);
-        mod_more_mpz(&c2, h, r, d1, q);
+        mpz_mul(tmp, h, s);
+        mpz_mod(tmp, tmp, q);
+        mod_more_mpz(&c2, tmp, r, d1, q);
         param_op_mpz(&c2, &c2, m, d1, q);
+
         t_enc[i] = timer() - start; // getting time
     }
     // printing file only for more than one iteration
