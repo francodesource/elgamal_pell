@@ -13,7 +13,7 @@ void dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _
     mpz_set_str(sk, _sk, 16);
     mpz_set_str(q, pk.q, 16);
     unsigned long n = mpz_sizeinbase(q, 2);
-    unsigned long pad = n / 16;
+    unsigned long pad = padding(n);
 
     float t_dec[t];
     for (int i = 0; i < t; i++) {

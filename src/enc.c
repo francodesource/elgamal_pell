@@ -2,6 +2,13 @@
 // Created by fvfra on 14/04/2025.
 //
 
+unsigned long padding(unsigned long size) {
+    if (size < 512) return size / 8;
+
+    return size / 16;
+}
+
+
 ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
     mpz_t q, d, d1, g, h, x, y, m, s, r, tmp;
     mpz_inits(q, d, d1, g, h, x, m, y,s, r, tmp, NULL);
@@ -12,7 +19,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
     public_key_set(q, d, g, h, pk); // converting from hexadecimal to mpz_t
     // computing padding value
     unsigned long q_bits = mpz_sizeinbase(q, 2);
-    unsigned long pad = q_bits / 16;
+    unsigned long pad = padding(q_bits);
     // check if message has correct size
     if (mpz_sizeinbase(msg, 2) > 2 * (q_bits - 1) - pad) {
         perror("Error: message is too long\n");
