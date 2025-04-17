@@ -7,10 +7,11 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -O3")
 
 add_executable(elgamal_piso main.c)
 add_executable(tests test.c)
-
+add_executable(benchmarks benchmarks.c)
 
 target_link_libraries(elgamal_piso gmp)
 target_link_libraries(tests gmp)
+target_link_libraries(benchmarks gmp)
 
 # test suite
 # unknown sizes
