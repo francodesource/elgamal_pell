@@ -3,6 +3,10 @@
 //
 #include <stdarg.h>
 
+/**
+ * Represents an element of the parametrized Pell Hyperbola
+ * that can be infinite or a number in F_q
+ */
 typedef struct {
     bool inf;
     mpz_t value;

@@ -110,6 +110,9 @@ void rand_primitive_root(mpz_t rop, gmp_randstate_t state, const mpz_t d, const 
     mpz_clears(temp.value, two, NULL);
 }
 
+/**
+ * Returns the minimum value in a vector of floats
+ */
 float min(const float * vec,const int size) {
     float min = vec[0];
     for (int i = 1; i < size; ++i) {

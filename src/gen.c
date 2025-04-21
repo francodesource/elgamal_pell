@@ -2,11 +2,23 @@
 // Created by fvfra on 11/04/2025.
 //
 
+/**
+ * A pair of public and secret keys for the ElGamal PISO scheme
+ * where parameters are stored in hexadecimal format.
+ */
 typedef struct {
     public_key pk;
     secret_key sk;
 } keys;
 
+/**
+ * Generates the keys for the ElGamal PISO scheme:
+ *  - q = 2p - 1 where q and p are prime
+ * @param n the desired size of q in bits
+ * @param t the number of iterations for the time measurement
+ * @param state the random state used for random number generation
+ * @return a private key and a public key
+ */
 keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
     mpz_t g, q, p, d, sk;
     mpz_inits(g, q, p, d, sk, NULL);
@@ -16,6 +28,7 @@ keys gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
     float t_par[t], t_mul[t];
     if (!primes_q_p_by_size(q, p, n)) {
+        // if there are no primes of size n, we generate them
         rand_prime_q_p(q, p, state, n);
     }
     // finding minimum time in t iterations

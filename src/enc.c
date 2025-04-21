@@ -4,17 +4,22 @@
 
 unsigned long padding(unsigned long size) {
     if (size < 512) return size / 8;
-
     return size / 16;
 }
 
-
+/**
+ * Encrypts a message using the ElGamal PISO scheme
+ * @param msg the message to encrypt
+ * @param pk the public key
+ * @param state the random state
+ * @param t the number of iterations for time measurement
+ * @return the ciphertext
+ */
 ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
     mpz_t q, d, d1, g, h, x, y, m, s, r, tmp;
-    mpz_inits(q, d, d1, g, h, x, m, y,s, r, tmp, NULL);
+    mpz_inits(q, d, d1, g, h, x, m, y, s, r, tmp, NULL);
     param_t c1, c2;
-    param_init(&c1);
-    param_init(&c2);
+    param_inits(&c1, &c2, NULL);;
     // q, d, g, h must not be modified inside the loop
     public_key_set(q, d, g, h, pk); // converting from hexadecimal to mpz_t
     // computing padding value
@@ -51,21 +56,18 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
             perror("Error: non square d found\n");
             exit(EXIT_FAILURE);
         }
-        // setting y
+        // setting y <- msg % (n - 1) + 1
         mpz_tdiv_r_2exp(y, msg, q_bits - 1);
         mpz_add_ui(y, y, 1);
 
-        // (??????????)
+        // (???)
         // aggiungo uno a y cosí é sempre diverso da zero e posso invertirlo altrimenti
         // l'algoritmo crasha per messaggi del tipo 110000...000
         // bisogna sottrarre uno anche in fase di decryption
 
+        // Handling case where y is not invertible
         if (mpz_invert(y, y, q) == 0) { // y <- y^-1
-            gmp_fprintf(
-                stderr,
-                "Error: y (%Zd) is not invertible\n",
-                y
-                );
+            gmp_fprintf(stderr, "Error: y (%Zd) is not invertible\n",y);
             exit(EXIT_FAILURE);
         }
         //  setting d
@@ -79,9 +81,7 @@ ciphertext enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int 
         mpz_mod(m, m, q);
         // setting random exponent r
         rand_range_ui(r, state, 2, q);
-
         // setting s
-
         mpz_invert(tmp, d, q);
         mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
         mpz_mod(tmp, tmp, q);
