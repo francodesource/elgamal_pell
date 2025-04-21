@@ -18,7 +18,7 @@
 #include "src/enc.c"
 #include "src/dec.c"
 
-// Modify these parameters to test differets sizes and iterations
+// Modify these parameters to test different sizes and iterations
 #define SIZE 7680
 #define ITER 10
 #define MSG "123456"
