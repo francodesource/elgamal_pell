@@ -37,7 +37,7 @@ int main(void) {
     mpz_inits(msg, res, NULL);
     mpz_set_str(msg, "123456", 10);
 
-    gmp_printf("Encrypting now message: %s\n", mpz_get_str(NULL, 2, msg));
+    gmp_printf("Encrypting now message: %Zd\n", msg);
     ciphertext ct = enc(msg, ks.pk, state, ITER);
     ciphertext_print(ct);
 
@@ -45,7 +45,7 @@ int main(void) {
     gmp_printf("Decrypted message: %Zd\n", res);
 
     if (mpz_cmp(msg, res) != 0) {
-        perror("elgamal piso failed :(\n");
+        perror("elgamal piso failed\n");
     }
 
     return 0;
