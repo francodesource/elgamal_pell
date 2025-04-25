@@ -2,15 +2,11 @@
 // Created by fvfra on 11/04/2025.
 //
 #include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-/**
- * Represents an element of the parametrized Pell Hyperbola
- * that can be infinite or a number in F_q
- */
-typedef struct {
-    bool inf;
-    mpz_t value;
-} param_t;
+#include "../include/params.h"
 
 void param_init(param_t * op) {
     op->inf = false;

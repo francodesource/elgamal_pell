@@ -2,25 +2,10 @@
 // Created by fvfra on 15/04/2025.
 //
 
+
 #include <stdio.h>
-#include <gmp.h>
-#include <stdbool.h>
-#include <string.h>
 #include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
-
-#include "results/location.c"
-#include "src/params.c"
-#include "src/keys.c"
-#include "src/utils/utils.c"
-#include "src/utils/pq_con.c"
-#include "src/utils/tonelli_shanks.c"
-#include "src/ciphertext.c"
-
-#include "src/gen.c"
-#include "src/enc.c"
-#include "src/dec.c"
+#include "include/elgamal_piso.h"
 
 /*
  * This file is used for testing
@@ -33,13 +18,13 @@ int test_gen_enc_dec_size_iter(int size) {
     mpz_t msg, res;
     mpz_inits(msg, res, NULL);
 
-    const keys ks = gen(size, 1, state);
+    const keys ks = piso_gen(size, 1, state);
     // initializing message to a number with size bigger than q
     const unsigned long pad = padding(size);
     const unsigned long max_bits = 2 * (size - 1) - pad -1;
     mpz_rrandomb(msg, state, max_bits);
-    const ciphertext ct = enc(msg, ks.pk, state, 1);
-    dec(res, ct, ks.pk, ks.sk, 1);
+    const ciphertext ct = piso_enc(msg, ks.pk, state, 1);
+    piso_dec(res, ct, ks.pk, ks.sk, 1);
 
     if (mpz_cmp(res, msg) != 0) {
         fprintf(stderr, "Error: message is not equal to message\n");

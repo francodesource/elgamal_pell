@@ -3,24 +3,13 @@
 //
 
 #include <stdio.h>
-#include <gmp.h>
-#include <stdbool.h>
-#include <string.h>
 #include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
+#include <gmp.h>
+#include <string.h>
 
-#include "results/location.c"
-#include "src/params.c"
-#include "src/keys.c"
-#include "src/utils/utils.c"
-#include "src/utils/pq_con.c"
-#include "src/utils/tonelli_shanks.c"
-#include "src/ciphertext.c"
+#include "./include/elgamal_piso.h"
 
-#include "src/gen.c"
-#include "src/enc.c"
-#include "src/dec.c"
+#include "./results/location.h"
 
 /*
  * This file is used for benchmarking the algorithm
@@ -114,9 +103,9 @@ int main() {
             mpz_inits(msg, res, NULL);
             mpz_set_str(msg, MSG, 10);
 
-            const keys ks = gen(sizes[i], FITER, state);
-            const ciphertext ct = enc(msg, ks.pk, state, FITER);
-            dec(res, ct, ks.pk, ks.sk, FITER);
+            const keys ks = piso_gen(sizes[i], FITER, state);
+            const ciphertext ct = piso_enc(msg, ks.pk, state, FITER);
+            piso_dec(res, ct, ks.pk, ks.sk, FITER);
 
             // checking if encryption and decryption were successful
             assert_eq(res, msg);

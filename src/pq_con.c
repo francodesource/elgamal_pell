@@ -1,6 +1,8 @@
 //
 // Created by fvfra on 11/04/2025.
 //
+#include "../include/pq_con.h"
+
 typedef struct {
     char * p;
     char * q;

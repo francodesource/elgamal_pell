@@ -1,22 +1,9 @@
-#include <stdio.h>
 #include <gmp.h>
-#include <stdbool.h>
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
 
-#include "results/location.c"
-#include "src/params.c"
-#include "src/keys.c"
-#include "src/utils/utils.c"
-#include "src/utils/pq_con.c"
-#include "src/utils/tonelli_shanks.c"
-#include "src/ciphertext.c"
-
-#include "src/gen.c"
-#include "src/enc.c"
-#include "src/dec.c"
+#include "include/keys.h"
+#include "include/elgamal_piso.h"
 
 // Modify these parameters to test different sizes and iterations
 #define SIZE 7680
@@ -29,7 +16,7 @@ int main(void) {
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
 
-    keys ks = gen(SIZE, ITER, state);
+    keys ks = piso_gen(SIZE, ITER, state);
     public_key_print(ks.pk);
     printf("Secret key: %s\n", ks.sk);
 
@@ -38,10 +25,10 @@ int main(void) {
     mpz_set_str(msg, "123456", 10);
 
     gmp_printf("Encrypting now message: %Zd\n", msg);
-    ciphertext ct = enc(msg, ks.pk, state, ITER);
+    ciphertext ct = piso_enc(msg, ks.pk, state, ITER);
     ciphertext_print(ct);
 
-    dec(res, ct, ks.pk, ks.sk, ITER);
+    piso_dec(res, ct, ks.pk, ks.sk, ITER);
     gmp_printf("Decrypted message: %Zd\n", res);
 
     if (mpz_cmp(msg, res) != 0) {

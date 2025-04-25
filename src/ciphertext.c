@@ -2,11 +2,9 @@
 // Created by fvfra on 14/04/2025.
 //
 
-typedef struct {
-    char * c1;
-    char * c2;
-    char * d;
-} ciphertext;
+# include "../include/ciphertext.h"
+
+#include <stdio.h>
 
 void chiphertext_from(ciphertext *ct, param_t c1, param_t c2, mpz_t d){
     ct->c1 = param_get_str(c1);
