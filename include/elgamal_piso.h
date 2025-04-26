@@ -10,6 +10,12 @@
 #include "./keys.h"
 #include "./ciphertext.h"
 
+/**
+ * Returns the padding size for the message given the size of q
+ * @param size the size of q in bits
+ * @return the number of bits to pad
+ */
+unsigned long padding(unsigned long size);
 
 /**
  * Generates the keys for the ElGamal PISO scheme:
