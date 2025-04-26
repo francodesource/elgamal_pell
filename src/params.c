@@ -65,15 +65,14 @@ void param_set_str(param_t *rop, const char* str, const int base) {
     }
 }
 
-int param_invert(param_t *rop, const param_t *op, const mpz_t mod) {
+void param_invert(param_t *rop, const param_t *op, const mpz_t mod) {
     if (op->inf) {
         param_set_inf(rop);
-        return 1;
+        return;
     }
     rop->inf = false;
     mpz_neg(rop->value, op->value);
     mpz_mod(rop->value, rop->value, mod);
-    return 1;
 }
 
 void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t d, const mpz_t q) {

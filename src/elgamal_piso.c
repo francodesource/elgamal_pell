@@ -10,7 +10,6 @@
 #include "../include/utils.h"
 #include "../include/ciphertext.h"
 #include "../include/pq_con.h"
-#include "../results/location.h"
 
 unsigned long padding(unsigned long size) {
     if (size < 512) return size / 8;
@@ -48,7 +47,7 @@ keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
     // printing time on file only for more than one iteration
     if (t > 1) {
         char filepath[100];
-        char * result_folder = results_folder_location();
+        char * result_folder = RESULT_PATH;
         sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
 
         // writing to file
@@ -158,7 +157,7 @@ ciphertext piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state,
     // printing file only for more than one iteration
     if (t > 1) {
         char filepath[100];
-        sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), q_bits, t);
+        sprintf(filepath, "%s/elgamal_piso_%ld_%d", RESULT_PATH, q_bits, t);
         FILE *fp = fopen(filepath, "a");
 
         fprintf(fp, "*** Enc(%ld, %d) ***\n", q_bits, t);
@@ -208,7 +207,7 @@ void piso_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_
     }
     if (t > 1) {
         char filepath[100];
-        sprintf(filepath, "%s/elgamal_piso_%ld_%d", results_folder_location(), n, t);
+        sprintf(filepath, "%s/elgamal_piso_%ld_%d", RESULT_PATH, n, t);
         FILE * file =  fopen(filepath, "a");
         fprintf(file, "*** Dec(%ld, %d) ***\ntime(dec)\t%f\n\n",n, t, min(t_dec, t));
         fclose(file);

@@ -5,11 +5,15 @@ include(CTest)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "-Wall -Wextra -O3")
 
+# Setting result path
+set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results")
+add_compile_definitions(RESULT_PATH="${RESULT_PATH}")
+
 file(GLOB SOURCES  "src/*.c")
-file(GLOB RES  "results/*.c")
-add_executable(elgamal_piso main.c ${SOURCES} ${RES})
-add_executable(tests test.c ${SOURCES} ${RES})
-add_executable(benchmarks benchmarks.c ${SOURCES} ${RES})
+
+add_executable(elgamal_piso main.c ${SOURCES})
+add_executable(tests test.c ${SOURCES})
+add_executable(benchmarks benchmarks.c ${SOURCES})
 
 target_link_libraries(elgamal_piso gmp)
 target_link_libraries(tests gmp)

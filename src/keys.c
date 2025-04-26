@@ -4,6 +4,8 @@
 
 #include "../include/keys.h"
 
+#include <stdio.h>
+
 void public_key_from(public_key *pk, mpz_t q, mpz_t d, mpz_t g, param_t h){
     pk->q = mpz_get_str(NULL, 16, q);
     pk->d = mpz_get_str(NULL, 16, d);

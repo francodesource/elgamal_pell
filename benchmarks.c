@@ -9,8 +9,6 @@
 
 #include "./include/elgamal_piso.h"
 
-#include "./results/location.h"
-
 /*
  * This file is used for benchmarking the algorithm
  * change the parameters below to test different sizes and iterations
@@ -88,14 +86,14 @@ int main() {
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, arc4random());
     char means_file[100];
-    sprintf(means_file, "%s/means", results_folder_location());
+    sprintf(means_file, "%s/means", RESULT_PATH);
     FILE * means = fopen(means_file, "w");
     fprintf(means, "%s", ""); // clear file from previous runs
     fclose(means);
     means = fopen(means_file, "a");
     for (int i = 0; i < NSIZE; i++) {
         char filepath[100];
-        sprintf(filepath, "%s/elgamal_piso_%d_%d", results_folder_location(), sizes[i], FITER);
+        sprintf(filepath, "%s/elgamal_piso_%d_%d", RESULT_PATH, sizes[i], FITER);
         clean_file(filepath);
         printf("computing benchmarks for size %d, iterations %d\n", sizes[i], FITER);
         for (int j = 0; j < ITER; j++) {
