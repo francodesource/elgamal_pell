@@ -15,7 +15,7 @@ typedef struct {
     char *h;
 } public_key;
 
-typedef char* secret_key;
+typedef const char* secret_key;
 
 /**
  * A pair of public and secret keys for the ElGamal PISO scheme

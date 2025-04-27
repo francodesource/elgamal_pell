@@ -58,5 +58,29 @@ ciphertext proj_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state)
 
   ciphertext ct;
   ciphertext_from(&ct, c1, c2);
+
+  mpz_clears(q, d, g, h, r, NULL);
+  param_clears(&c1, &c2, NULL);
   return ct;
+}
+
+void proj_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _sk) {
+  mpz_t q, d, sk;
+  param_t c1, c2;
+  mpz_inits(q, d, sk, NULL);
+  param_inits(&c1, &c2, NULL);
+  ciphertext_set(&c1, &c2, ct);
+
+  mod_more(&c1, &c1, sk, d, q);
+  param_invert(&c1, &c1, q);
+  param_op(&c1, &c1, &c2, d, q);
+
+  if (c1.inf) {
+    fprintf(stderr, "Some error occurred during decryption\n");
+    exit(EXIT_FAILURE);
+  }
+
+  mpz_set(rop, c1.value);
+  mpz_clears(q, d, sk, NULL);
+  param_clears(&c1, &c2, NULL);
 }
