@@ -102,7 +102,7 @@ int main() {
             mpz_set_str(msg, MSG, 10);
 
             const keys ks = piso_gen(sizes[i], FITER, state);
-            const ciphertext ct = piso_enc(msg, ks.pk, state, FITER);
+            const ciphertext_d ct = piso_enc(msg, ks.pk, state, FITER);
             piso_dec(res, ct, ks.pk, ks.sk, FITER);
 
             // checking if encryption and decryption were successful

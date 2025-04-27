@@ -25,8 +25,8 @@ int main(void) {
     mpz_set_str(msg, "123456", 10);
 
     gmp_printf("Encrypting now message: %Zd\n", msg);
-    ciphertext ct = piso_enc(msg, ks.pk, state, ITER);
-    ciphertext_print(ct);
+    ciphertext_d ct = piso_enc(msg, ks.pk, state, ITER);
+    ciphertext_d_print(ct);
 
     piso_dec(res, ct, ks.pk, ks.sk, ITER);
     gmp_printf("Decrypted message: %Zd\n", res);

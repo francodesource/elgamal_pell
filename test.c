@@ -23,7 +23,7 @@ int test_gen_enc_dec_size_iter(int size) {
     const unsigned long pad = padding(size);
     const unsigned long max_bits = 2 * (size - 1) - pad -1;
     mpz_rrandomb(msg, state, max_bits);
-    const ciphertext ct = piso_enc(msg, ks.pk, state, 1);
+    const ciphertext_d ct = piso_enc(msg, ks.pk, state, 1);
     piso_dec(res, ct, ks.pk, ks.sk, 1);
 
     if (mpz_cmp(res, msg) != 0) {

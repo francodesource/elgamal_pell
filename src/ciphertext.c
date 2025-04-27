@@ -6,17 +6,31 @@
 
 #include <stdio.h>
 
-void chiphertext_from(ciphertext *ct, param_t c1, param_t c2, mpz_t d){
+void ciphertext_from(ciphertext *ct, param_t c1, param_t c2, mpz_t d){
+    ct->c1 = param_get_str(c1);
+    ct->c2 = param_get_str(c2);
+}
+
+void ciphertext_print(ciphertext_d ct) {
+    printf("ciphertext:\nc1: %s\nc2: %s\n", ct.c1, ct.c2);
+}
+
+void ciphertext_set(param_t * c1, param_t * c2, const ciphertext ct) {
+    param_set_str(c1, ct.c1, 16);
+    param_set_str(c2, ct.c2, 16);
+}
+
+void ciphertext_d_from(ciphertext_d *ct, param_t c1, param_t c2, mpz_t d){
     ct->c1 = param_get_str(c1);
     ct->c2 = param_get_str(c2);
     ct->d = mpz_get_str(NULL, 16, d);
 }
 
-void ciphertext_print(ciphertext ct) {
+void ciphertext_d_print(ciphertext_d ct) {
     printf("ciphertext:\nc1: %s\nc2: %s\nd: %s\n", ct.c1, ct.c2, ct.d);
 }
 
-void ciphertext_set(param_t * c1, param_t * c2, mpz_t d, const ciphertext ct) {
+void ciphertext_d_set(param_t * c1, param_t * c2, mpz_t d, const ciphertext_d ct) {
     param_set_str(c1, ct.c1, 16);
     param_set_str(c2, ct.c2, 16);
     mpz_set_str(d, ct.d, 16);

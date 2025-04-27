@@ -35,8 +35,8 @@ keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state);
  * @param t the number of iterations for time measurement
  * @return the ciphertext
  */
-ciphertext piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t);
+ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t);
 
-void piso_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _sk, int t);
+void piso_dec(mpz_t rop, const ciphertext_d ct, const public_key pk, const secret_key _sk, int t);
 
 #endif //ELGAMAL_PISO_H

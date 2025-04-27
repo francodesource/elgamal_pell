@@ -69,7 +69,7 @@ keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
 }
 
-ciphertext piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
+ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
     mpz_t q, d, d1, g, h, x, y, m, s, r, tmp;
     mpz_inits(q, d, d1, g, h, x, m, y, s, r, tmp, NULL);
     param_t c1, c2;
@@ -165,7 +165,7 @@ ciphertext piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state,
         fclose(fp);
     }
 
-    const ciphertext ct = {
+    const ciphertext_d ct = {
         .c1 = param_get_str(c1),
         .c2 = param_get_str(c2),
         .d  = mpz_get_str(NULL, 16, d1)
@@ -177,14 +177,14 @@ ciphertext piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state,
     return ct;
 }
 
-void piso_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_key _sk, int t) {
+void piso_dec(mpz_t rop, const ciphertext_d ct, const public_key pk, const secret_key _sk, int t) {
     mpz_t x, y, d1, q, sk;
     param_t c1, c2, m; // c1 and c2 must  not be modified inside the loop
 
     param_inits(&c1, &c2, &m, NULL);
     mpz_inits(x, y, d1, q, sk, NULL);
 
-    ciphertext_set(&c1, &c2, d1, ct);
+    ciphertext_d_set(&c1, &c2, d1, ct);
     mpz_set_str(sk, _sk, 16);
     mpz_set_str(q, pk.q, 16);
     unsigned long n = mpz_sizeinbase(q, 2);
