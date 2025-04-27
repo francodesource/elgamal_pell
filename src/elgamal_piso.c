@@ -70,15 +70,15 @@ keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 }
 
 ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
-    mpz_t q, d, d1, g, h, x, y, m, s, r, tmp;
-    mpz_inits(q, d, d1, g, h, x, m, y, s, r, tmp, NULL);
-    param_t c1, c2;
-    param_inits(&c1, &c2, NULL);;
+    mpz_t q, d, d1, g, x, y, m, s, r, tmp;
+    mpz_inits(q, d, d1, g, x, m, y, s, r, tmp, NULL);
+    param_t h, c1, c2;
+    param_inits(&h, &c1, &c2, NULL);;
     // q, d, g, h must not be modified inside the loop
-    public_key_set(q, d, g, h, pk); // converting from hexadecimal to mpz_t
+    public_key_set(q, d, g, &h, pk); // converting from hexadecimal to mpz_t
     // computing padding value
-    unsigned long q_bits = mpz_sizeinbase(q, 2);
-    unsigned long pad = padding(q_bits);
+    const unsigned long q_bits = mpz_sizeinbase(q, 2);
+    const unsigned long pad = padding(q_bits);
     // check if message has correct size
     if (mpz_sizeinbase(msg, 2) > 2 * (q_bits - 1) - pad) {
         perror("Error: message is too long\n");
@@ -147,7 +147,12 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
         mpz_mod(tmp, tmp, q);
         mod_more_mpz(&c1, tmp, r, d1, q);
 
-        mpz_mul(tmp, h, s);
+        if (h.inf) {
+            fprintf(stderr, "Error: h is infinite\n");
+            exit(EXIT_FAILURE);
+        }
+
+        mpz_mul(tmp, h.value, s);
         mpz_mod(tmp, tmp, q);
         mod_more_mpz(&c2, tmp, r, d1, q);
         param_op_mpz(&c2, &c2, m, d1, q);
