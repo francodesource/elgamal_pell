@@ -3,6 +3,10 @@
 //
 
 #include "../include/elgamal_proj.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "../include/pq_con.h"
 #include "../include/utils.h"
 
@@ -29,4 +33,30 @@ keys proj_gen(mp_bitcnt_t n, gmp_randstate_t state){
   mpz_clears(q, p, d, g, sk, NULL);
   param_clears(&h, NULL);
   return ks;
+}
+
+ciphertext proj_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state) {
+  mpz_t q, d, g, r, h;
+  param_t c1, c2;
+
+  mpz_inits(q, d, g, h, r, NULL);
+  param_inits(&c1, &c2, NULL);
+
+  public_key_set(q, d, g, h, pk);
+
+  // check message length
+  if (mpz_sizeinbase(msg, 2) > mpz_sizeinbase(q, 2)) {
+    fprintf(stderr, "Error: message is too long\n");
+    exit(EXIT_FAILURE);
+  }
+  // r <- random number in [2, q)
+  rand_range_ui(r, state, 2, q);
+
+  mod_more_mpz(&c1, g, r, d, q);
+  mod_more_mpz(&c2, h, r, d, q);
+  param_op_mpz(&c2, &c2, msg, d, q);
+
+  ciphertext ct;
+  ciphertext_from(&ct, c1, c2);
+  return ct;
 }
