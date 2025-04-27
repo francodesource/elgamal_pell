@@ -44,6 +44,12 @@ void rand_prime_q_p(mpz_t q, mpz_t p, gmp_randstate_t state, const mp_bitcnt_t b
     } while (mpz_probab_prime_p(q, 15) == 0);
 }
 
+void rand_non_square(mpz_t rop, gmp_randstate_t state, const mpz_t q) {
+    do {
+        mpz_urandomm(rop, state, q);
+    } while (mpz_jacobi(rop, q) != -1);
+}
+
 void smallest_non_square(mpz_t rop, const mpz_t q) {
     mpz_set_ui(rop, 2);
     while (mpz_jacobi(rop, q) != -1) {

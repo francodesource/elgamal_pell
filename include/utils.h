@@ -53,6 +53,14 @@ void rand_prime(mpz_t rop, gmp_randstate_t state, const mp_bitcnt_t bits);
 void rand_prime_q_p(mpz_t q, mpz_t p, gmp_randstate_t state, const mp_bitcnt_t bits);
 
 /**
+ * Returns a random non-square mod q
+ *
+ * @param rop stores the result, must be already initialized
+ * @param state the random state
+ * @param q the modulus, must be already initialized
+ */
+void rand_non_square(mpz_t rop, gmp_randstate_t state, const mpz_t q);
+/**
 * Stores in rop the smallest non-square mod q
 * @param rop stores the result, must be already initialized
 * @param q the modulus, must be already initialized
