@@ -14,7 +14,7 @@ keys proj_gen(mp_bitcnt_t n, gmp_randstate_t state){
 
   mpz_t q, p, d, g, sk;
   param_t h;
-  mpz_inits(q, p, d, g, sk NULL);
+  mpz_inits(q, p, d, g, sk, NULL);
   param_init(&h);
 
   if (!primes_q_p_by_size(q, p, n)) {
@@ -36,16 +36,16 @@ keys proj_gen(mp_bitcnt_t n, gmp_randstate_t state){
 }
 
 ciphertext proj_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state) {
-  mpz_t q, d, g, r, h;
-  param_t c1, c2;
+  mpz_t q, d, g, r;
+  param_t h, c1, c2;
 
-  mpz_inits(q, d, g, h, r, NULL);
-  param_inits(&c1, &c2, NULL);
+  mpz_inits(q, d, g, r, NULL);
+  param_inits(&h, &c1, &c2, NULL);
 
-  public_key_set(q, d, g, h, pk);
+  public_key_set(q, d, g, &h, pk);
 
   // check message length
-  if (mpz_sizeinbase(msg, 2) > mpz_sizeinbase(q, 2)) {
+  if (mpz_cmp(msg, q) >= 0) {
     fprintf(stderr, "Error: message is too long\n");
     exit(EXIT_FAILURE);
   }
@@ -53,8 +53,14 @@ ciphertext proj_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state)
   rand_range_ui(r, state, 2, q);
 
   mod_more_mpz(&c1, g, r, d, q);
-  mod_more_mpz(&c2, h, r, d, q);
+  mod_more(&c2, &h, r, d, q);
   param_op_mpz(&c2, &c2, msg, d, q);
+
+  if (c2.inf) {
+    printf("Infinite\n");
+    gmp_printf("r: %Zx\n", r);
+    gmp_printf("msg: %Zx\n", msg);
+  }
 
   ciphertext ct;
   ciphertext_from(&ct, c1, c2);
@@ -69,14 +75,22 @@ void proj_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_
   param_t c1, c2;
   mpz_inits(q, d, sk, NULL);
   param_inits(&c1, &c2, NULL);
-  ciphertext_set(&c1, &c2, ct);
 
+  mpz_set_str(q, pk.q, 16);
+  mpz_set_str(d, pk.d, 16);
+  mpz_set_str(sk, _sk, 16);
+
+  ciphertext_set(&c1, &c2, ct);
   mod_more(&c1, &c1, sk, d, q);
+
   param_invert(&c1, &c1, q);
   param_op(&c1, &c1, &c2, d, q);
 
   if (c1.inf) {
     fprintf(stderr, "Some error occurred during decryption\n");
+    public_key_print(pk);
+    ciphertext_print(ct);
+    printf( "sk: %s", _sk);
     exit(EXIT_FAILURE);
   }
 
