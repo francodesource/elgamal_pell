@@ -6,12 +6,12 @@
 
 #include <stdio.h>
 
-void ciphertext_from(ciphertext *ct, param_t c1, param_t c2, mpz_t d){
+void ciphertext_from(ciphertext *ct, const param_t c1, const param_t c2){
     ct->c1 = param_get_str(c1);
     ct->c2 = param_get_str(c2);
 }
 
-void ciphertext_print(ciphertext_d ct) {
+void ciphertext_print(const ciphertext ct) {
     printf("ciphertext:\nc1: %s\nc2: %s\n", ct.c1, ct.c2);
 }
 
@@ -20,7 +20,7 @@ void ciphertext_set(param_t * c1, param_t * c2, const ciphertext ct) {
     param_set_str(c2, ct.c2, 16);
 }
 
-void ciphertext_d_from(ciphertext_d *ct, param_t c1, param_t c2, mpz_t d){
+void ciphertext_d_from(ciphertext_d *ct, const param_t c1, const param_t c2, mpz_t d){
     ct->c1 = param_get_str(c1);
     ct->c2 = param_get_str(c2);
     ct->d = mpz_get_str(NULL, 16, d);
