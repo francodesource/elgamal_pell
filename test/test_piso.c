@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "include/elgamal_piso.h"
+#include "../include/elgamal_piso.h"
 
 /*
  * This file is used for testing

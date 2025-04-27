@@ -25,6 +25,9 @@ target_link_libraries(benchmarks gmp)
 
 # PROJ
 add_test(NAME testProjGED8    COMMAND test_proj 8 10000)
+add_test(NAME testProjGED16   COMMAND test_proj 16 10000)
+add_test(NAME testProjGED32   COMMAND test_proj 32 10000)
+add_test(NAME testProjGED64   COMMAND test_proj 64 10000)
 add_test(NAME testProjGED128  COMMAND test_proj 128 1000)
 add_test(NAME testProjGED256  COMMAND test_proj 256 1000)
 add_test(NAME testProjGED1024 COMMAND test_proj 1024 1000)
