@@ -4,9 +4,10 @@
 
 #include "include/keys.h"
 #include "include/elgamal_piso.h"
+#include "include/elgamal_proj.h"
 
 // Modify these parameters to test different sizes and iterations
-#define SIZE 7680
+#define SIZE 512
 #define ITER 10
 #define MSG "123456"
 
@@ -34,6 +35,17 @@ int main(void) {
     if (mpz_cmp(msg, res) != 0) {
         perror("elgamal piso failed\n");
     }
+    mpz_set_str(msg, "24681214", 10);
+    ks = proj_gen(SIZE, state);
+    public_key_print(ks.pk);
+    ciphertext ct2 = proj_enc(msg, ks.pk, state);
+    ciphertext_print(ct2);
+    proj_dec(res, ct2, ks.pk, ks.sk);
+    gmp_printf("Decrypted message: %Zd\n", res);
+    if (mpz_cmp(msg, res) != 0) {
+        perror("elgamal proj failed\n");
+    }
+    mpz_clears(msg, res, NULL);
 
     return 0;
 }
