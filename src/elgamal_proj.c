@@ -56,12 +56,6 @@ ciphertext proj_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state)
   mod_more(&c2, &h, r, d, q);
   param_op_mpz(&c2, &c2, msg, d, q);
 
-  if (c2.inf) {
-    printf("Infinite\n");
-    gmp_printf("r: %Zx\n", r);
-    gmp_printf("msg: %Zx\n", msg);
-  }
-
   ciphertext ct;
   ciphertext_from(&ct, c1, c2);
 
@@ -85,14 +79,6 @@ void proj_dec(mpz_t rop, const ciphertext ct, const public_key pk, const secret_
 
   param_invert(&c1, &c1, q);
   param_op(&c1, &c1, &c2, d, q);
-
-  if (c1.inf) {
-    fprintf(stderr, "Some error occurred during decryption\n");
-    public_key_print(pk);
-    ciphertext_print(ct);
-    printf( "sk: %s", _sk);
-    exit(EXIT_FAILURE);
-  }
 
   mpz_set(rop, c1.value);
   mpz_clears(q, d, sk, NULL);
