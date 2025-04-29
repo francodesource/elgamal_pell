@@ -5,6 +5,7 @@
 # include "../include/ciphertext.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 void ciphertext_from(ciphertext *ct, const param_t c1, const param_t c2){
     ct->c1 = param_get_str(c1);
@@ -18,6 +19,11 @@ void ciphertext_print(const ciphertext ct) {
 void ciphertext_set(param_t * c1, param_t * c2, const ciphertext ct) {
     param_set_str(c1, ct.c1, 16);
     param_set_str(c2, ct.c2, 16);
+}
+
+void ciphertext_clear(ciphertext * ct) {
+    free(ct->c1);
+    free(ct->c2);
 }
 
 void ciphertext_d_from(ciphertext_d *ct, const param_t c1, const param_t c2, mpz_t d){
@@ -34,4 +40,10 @@ void ciphertext_d_set(param_t * c1, param_t * c2, mpz_t d, const ciphertext_d ct
     param_set_str(c1, ct.c1, 16);
     param_set_str(c2, ct.c2, 16);
     mpz_set_str(d, ct.d, 16);
+}
+
+void ciphertext_d_clear(ciphertext_d * ct) {
+    free(ct->c1);
+    free(ct->c2);
+    free(ct->d);
 }

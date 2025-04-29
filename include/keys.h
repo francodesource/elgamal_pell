@@ -32,5 +32,9 @@ void public_key_print(public_key pk);
 
 void public_key_set(mpz_t q, mpz_t d, mpz_t g, param_t * h, const public_key pk);
 
+void public_key_clear(public_key * pk);
+
 void secret_key_from(secret_key *sk, mpz_t n);
+
+void secret_key_clear(secret_key sk);
 #endif //KEYS_H
