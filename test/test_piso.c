@@ -18,13 +18,13 @@ int test_gen_enc_dec_size_iter(int size) {
     mpz_t msg, res;
     mpz_inits(msg, res, NULL);
 
-    const keys ks = piso_gen(size, 1, state);
+    const keys ks = piso_gen(size, state);
     // initializing message to a number with size bigger than q
     const unsigned long pad = padding(size);
     const unsigned long max_bits = 2 * (size - 1) - pad -1;
     mpz_rrandomb(msg, state, max_bits);
-    const ciphertext_d ct = piso_enc(msg, ks.pk, state, 1);
-    piso_dec(res, ct, ks.pk, ks.sk, 1);
+    const ciphertext_d ct = piso_enc(msg, ks.pk, state);
+    piso_dec(res, ct, ks.pk, ks.sk);
 
     if (mpz_cmp(res, msg) != 0) {
         fprintf(stderr, "Error: message is not equal to message\n");
