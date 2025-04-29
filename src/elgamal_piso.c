@@ -16,45 +16,24 @@ unsigned long padding(unsigned long size) {
     return size / 16;
 }
 
-keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
+keys piso_gen(mp_bitcnt_t n, gmp_randstate_t state) {
     mpz_t g, q, p, d, sk;
     mpz_inits(g, q, p, d, sk, NULL);
 
     param_t h;
     param_init(&h);
 
-    float t_par[t], t_mul[t];
     if (!primes_q_p_by_size(q, p, n)) {
         // if there are no primes of size n, we generate them
         rand_prime_q_p(q, p, state, n);
     }
-    // finding minimum time in t iterations
-    for (int i = 0; i < t; i++) {
+    smallest_non_square(d, q);
+    rand_primitive_root(g, state, d, q, p);
 
-        // measuring time for parameter generation
-        float start = timer();
-        smallest_non_square(d, q);
-        rand_primitive_root(g, state, d, q, p);
-        t_par[i] = timer() - start;
+    // measuring time for exponentiation
+    rand_range_ui(sk, state, 2, q);
+    mod_more_mpz(&h, g, sk, d, q);
 
-        // measuring time for exponentiation
-        start = timer();
-        rand_range_ui(sk, state, 2, q);
-        mod_more_mpz(&h, g, sk, d, q);
-        t_mul[i] = timer() - start;
-    }
-
-    // printing time on file only for more than one iteration
-    if (t > 1) {
-        char filepath[100];
-        char * result_folder = RESULT_PATH;
-        sprintf(filepath, "%s/elgamal_piso_%ld_%d", result_folder, n, t);
-
-        // writing to file
-        FILE * fp = fopen(filepath, "a");
-        fprintf(fp, "*** Gen(%ld, %d) ***\ntime(par)\t%f\ntime(mul)\t%f\n", n, t, min(t_par, t), min(t_mul, t));
-        fclose(fp);
-    }
 
     // returning the key as hex strings
     keys res;
@@ -69,7 +48,7 @@ keys piso_gen(mp_bitcnt_t n, int t, gmp_randstate_t state) {
 
 }
 
-ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state, int t) {
+ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state) {
     mpz_t q, d, d1, g, x, y, m, s, r, tmp;
     mpz_inits(q, d, d1, g, x, m, y, s, r, tmp, NULL);
     param_t h, c1, c2;
@@ -85,90 +64,75 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
         exit(EXIT_FAILURE);
     }
 
-    float t_enc[t];
-    for (int i = 0; i < t; i++) {
-        float start = timer();
-        // splitting message in two coordinates
-        mpz_tdiv_q_2exp(x, msg, q_bits - 1);
-        // padding the message
-        mpz_mul_2exp(x, x, pad);
-        // finding a suitable d
-        bool found = false;
-        for (unsigned long int j = 0; j < pad; j++) {
-            mpz_mul(d1, x, x);
-            mpz_sub_ui(d1, d1, 1);
-            mpz_mod(d1, d1, q);
-            if (mpz_jacobi(d1, q) == -1) {
-                found = true;
-                break;
-            }
-            mpz_add_ui(x, x, 1);
-        }
 
-        // exit the program if no suitable d is found
-        if (!found) {
-            perror("Error: non square d found\n");
-            exit(EXIT_FAILURE);
+    // splitting message in two coordinates
+    mpz_tdiv_q_2exp(x, msg, q_bits - 1);
+    // padding the message
+    mpz_mul_2exp(x, x, pad);
+    // finding a suitable d
+    bool found = false;
+    for (unsigned long int j = 0; j < pad; j++) {
+        mpz_mul(d1, x, x);
+        mpz_sub_ui(d1, d1, 1);
+        mpz_mod(d1, d1, q);
+        if (mpz_jacobi(d1, q) == -1) {
+            found = true;
+            break;
         }
+        mpz_add_ui(x, x, 1);
+    }
+
+    // exit the program if no suitable d is found
+    if (!found) {
+        perror("Error: non square d found\n");
+        exit(EXIT_FAILURE);
+    }
         // setting y <- msg % (n - 1) + 1
-        mpz_tdiv_r_2exp(y, msg, q_bits - 1);
-        mpz_add_ui(y, y, 1);
+    mpz_tdiv_r_2exp(y, msg, q_bits - 1);
+    mpz_add_ui(y, y, 1);
 
-        // (???)
-        // aggiungo uno a y cosí é sempre diverso da zero e posso invertirlo altrimenti
-        // l'algoritmo crasha per messaggi del tipo 110000...000
-        // bisogna sottrarre uno anche in fase di decryption
+    // (???)
+    // aggiungo uno a y cosí é sempre diverso da zero e posso invertirlo altrimenti
+    // l'algoritmo crasha per messaggi del tipo 110000...000
+    // bisogna sottrarre uno anche in fase di decryption
 
-        // Handling case where y is not invertible
-        if (mpz_invert(y, y, q) == 0) { // y <- y^-1
-            gmp_fprintf(stderr, "Error: y (%Zd) is not invertible\n",y);
-            exit(EXIT_FAILURE);
-        }
-        //  setting d
-        mpz_powm_ui(tmp, y, 2, q); // tmp <- y^2
-        mpz_mul(d1, d1, tmp);
-        mpz_mod(d1, d1, q); // d1 <- (x^2 - 1) / y^2
-
-        // setting m
-        mpz_add_ui(m, x, 1);
-        mpz_mul(m, m, y);
-        mpz_mod(m, m, q);
-        // setting random exponent r
-        rand_range_ui(r, state, 2, q);
-        // setting s
-        mpz_invert(tmp, d, q);
-        mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
-        mpz_mod(tmp, tmp, q);
-
-        sqrt_m(s, tmp, q);
-
-        // setting c1 & c2
-        mpz_mul(tmp, g, s);
-        mpz_mod(tmp, tmp, q);
-        mod_more_mpz(&c1, tmp, r, d1, q);
-
-        if (h.inf) {
-            fprintf(stderr, "Error: h is infinite\n");
-            exit(EXIT_FAILURE);
-        }
-
-        mpz_mul(tmp, h.value, s);
-        mpz_mod(tmp, tmp, q);
-        mod_more_mpz(&c2, tmp, r, d1, q);
-        param_op_mpz(&c2, &c2, m, d1, q);
-
-        t_enc[i] = timer() - start; // getting time
+    // Handling case where y is not invertible
+    if (mpz_invert(y, y, q) == 0) { // y <- y^-1
+        gmp_fprintf(stderr, "Error: y (%Zd) is not invertible\n",y);
+        exit(EXIT_FAILURE);
     }
-    // printing file only for more than one iteration
-    if (t > 1) {
-        char filepath[100];
-        sprintf(filepath, "%s/elgamal_piso_%ld_%d", RESULT_PATH, q_bits, t);
-        FILE *fp = fopen(filepath, "a");
+    //  setting d
+    mpz_powm_ui(tmp, y, 2, q); // tmp <- y^2
+    mpz_mul(d1, d1, tmp);
+    mpz_mod(d1, d1, q); // d1 <- (x^2 - 1) / y^2
 
-        fprintf(fp, "*** Enc(%ld, %d) ***\n", q_bits, t);
-        fprintf(fp, "time(enc)\t%f\n", min(t_enc, t));
-        fclose(fp);
+    // setting m
+    mpz_add_ui(m, x, 1);
+    mpz_mul(m, m, y);
+    mpz_mod(m, m, q);
+    // setting random exponent r
+    rand_range_ui(r, state, 2, q);
+    // setting s
+    mpz_invert(tmp, d, q);
+    mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
+    mpz_mod(tmp, tmp, q);
+
+    sqrt_m(s, tmp, q);
+
+    // setting c1 & c2
+    mpz_mul(tmp, g, s);
+    mpz_mod(tmp, tmp, q);
+    mod_more_mpz(&c1, tmp, r, d1, q);
+
+    if (h.inf) {
+        fprintf(stderr, "Error: h is infinite\n");
+        exit(EXIT_FAILURE);
     }
+
+    mpz_mul(tmp, h.value, s);
+    mpz_mod(tmp, tmp, q);
+    mod_more_mpz(&c2, tmp, r, d1, q);
+    param_op_mpz(&c2, &c2, m, d1, q);
 
     const ciphertext_d ct = {
         .c1 = param_get_str(c1),
@@ -182,7 +146,7 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
     return ct;
 }
 
-void piso_dec(mpz_t rop, const ciphertext_d ct, const public_key pk, const secret_key _sk, int t) {
+void piso_dec(mpz_t rop, const ciphertext_d ct, const public_key pk, const secret_key _sk) {
     mpz_t x, y, d1, q, sk;
     param_t c1, c2, m; // c1 and c2 must  not be modified inside the loop
 
@@ -195,28 +159,16 @@ void piso_dec(mpz_t rop, const ciphertext_d ct, const public_key pk, const secre
     unsigned long n = mpz_sizeinbase(q, 2);
     unsigned long pad = padding(n);
 
-    float t_dec[t];
-    for (int i = 0; i < t; i++) {
-        float start = timer();
-        mod_more(&m, &c1, sk, d1, q);
-        param_invert(&m, &m, q);
-        param_op(&m, &m, &c2, d1, q); // (-c1^sk) * c2
+    mod_more(&m, &c1, sk, d1, q);
+    param_invert(&m, &m, q);
+    param_op(&m, &m, &c2, d1, q); // (-c1^sk) * c2
 
-        param_coord(x, y, &m, d1, q);
-        mpz_tdiv_q_2exp(x, x, pad);
-        mpz_mul_2exp(rop, x, n - 1);
-        mpz_sub_ui(y, y, 1);
-        mpz_add(rop, rop, y);
+    param_coord(x, y, &m, d1, q);
+    mpz_tdiv_q_2exp(x, x, pad);
+    mpz_mul_2exp(rop, x, n - 1);
+    mpz_sub_ui(y, y, 1);
+    mpz_add(rop, rop, y);
 
-        t_dec[i] = timer() - start;
-    }
-    if (t > 1) {
-        char filepath[100];
-        sprintf(filepath, "%s/elgamal_piso_%ld_%d", RESULT_PATH, n, t);
-        FILE * file =  fopen(filepath, "a");
-        fprintf(file, "*** Dec(%ld, %d) ***\ntime(dec)\t%f\n\n",n, t, min(t_dec, t));
-        fclose(file);
-    }
     mpz_clears(x, y, d1, q, sk, NULL);
     param_clears(&c1, &c2, &m, NULL);
 }
