@@ -17,7 +17,7 @@ unsigned long padding(unsigned long size) {
 }
 
 keys piso_gen(mp_bitcnt_t n, gmp_randstate_t state) {
-    mpz_t g, q, p, d, sk;
+    mpz_t     g, q, p, d, sk;
     mpz_inits(g, q, p, d, sk, NULL);
 
     param_t h;
@@ -30,7 +30,6 @@ keys piso_gen(mp_bitcnt_t n, gmp_randstate_t state) {
     smallest_non_square(d, q);
     rand_primitive_root(g, state, d, q, p);
 
-    // measuring time for exponentiation
     rand_range_ui(sk, state, 2, q);
     mod_more_mpz(&h, g, sk, d, q);
 
@@ -45,15 +44,14 @@ keys piso_gen(mp_bitcnt_t n, gmp_randstate_t state) {
     param_clears(&h, NULL);
 
     return res;
-
 }
 
 ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t state) {
-    mpz_t q, d, d1, g, x, y, m, s, r, tmp;
-    mpz_inits(q, d, d1, g, x, m, y, s, r, tmp, NULL);
+    mpz_t     q, d, d1, g, x, y, m, s, r, tmp;
+    mpz_inits(q, d, d1, g, x, y, m, s, r, tmp, NULL);
     param_t h, c1, c2;
     param_inits(&h, &c1, &c2, NULL);;
-    // q, d, g, h must not be modified inside the loop
+
     public_key_set(q, d, g, &h, pk); // converting from hexadecimal to mpz_t
     // computing padding value
     const unsigned long q_bits = mpz_sizeinbase(q, 2);
@@ -63,7 +61,6 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
         perror("Error: message is too long\n");
         exit(EXIT_FAILURE);
     }
-
 
     // splitting message in two coordinates
     mpz_tdiv_q_2exp(x, msg, q_bits - 1);
@@ -110,8 +107,10 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
     mpz_add_ui(m, x, 1);
     mpz_mul(m, m, y);
     mpz_mod(m, m, q);
+
     // setting random exponent r
     rand_range_ui(r, state, 2, q);
+
     // setting s
     mpz_invert(tmp, d, q);
     mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
@@ -134,15 +133,12 @@ ciphertext_d piso_enc(const mpz_t msg, const public_key pk, gmp_randstate_t stat
     mod_more_mpz(&c2, tmp, r, d1, q);
     param_op_mpz(&c2, &c2, m, d1, q);
 
-    const ciphertext_d ct = {
-        .c1 = param_get_str(c1),
-        .c2 = param_get_str(c2),
-        .d  = mpz_get_str(NULL, 16, d1)
-    };
-
+    ciphertext_d ct ;
+    ciphertext_d_from(&ct, c1, c2, d1);
     // freeing memory
-    mpz_clears(q, d, d1, g, h, x, m, s, r, tmp, NULL);
-    param_clears(&c1, &c2, NULL);
+    mpz_clears(q, d, d1, g, x, y, m, s, r, tmp, NULL);
+    param_clears(&h, &c1, &c2, NULL);
+
     return ct;
 }
 
