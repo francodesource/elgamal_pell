@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include <string.h>
 
 #include "include/utils.h"
 #include "include/elgamal_piso.h"
@@ -25,33 +26,16 @@ void assert_eq(mpz_t a, mpz_t b) {
     }
 }
 
-int main(const int argc, char const *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <iterations> <sizes 1-5>\n", argv[0]);
-        return 1;
-    }
-
-    int iterations = atoi(argv[1]);
-    int sizeIndex  = atoi(argv[2]);
+void benchmark_proj(int iterations, int sizeIndex, gmp_randstate_t state, mpz_t msg, mpz_t res) {
+    float start;
+    float t_gen;
+    float t_enc;
+    float t_dec;
 
     char filepath[100];
     sprintf(filepath, "%s/proj_benchmark_%d_%d_%d.csv",RESULT_PATH, sizes[0], sizes[sizeIndex - 1], iterations);
-
     FILE *fp = fopen(filepath, "w");
-    // adding headers to csv
     fprintf(fp, CSV_HEADER);
-
-    gmp_randstate_t state;
-    gmp_randinit_mt(state);
-    gmp_randseed_ui(state, arc4random());
-
-    mpz_t msg, res;
-    mpz_inits(msg, res, NULL);
-    mpz_set_str(msg, "123456", 10);
-
-    float start, t_gen, t_enc, t_dec;
-
-
     // PROJ BENCHMARKING
     printf("Running benchmark for PROJ...\n");
     for (int i = 0; i < sizeIndex; ++i) {
@@ -80,14 +64,19 @@ int main(const int argc, char const *argv[]) {
     fclose(fp);
 
     sprintf(filepath, "%s/piso_benchmark_%d_%d_%d.csv",RESULT_PATH, sizes[0], sizes[sizeIndex - 1], iterations);
+}
 
-    fp = fopen(filepath, "w");
-    // adding headers to csv
+void benchmark_piso(int iterations, int sizeIndex,  gmp_randstate_t state, mpz_t msg, mpz_t res) {
+    float start, t_gen, t_enc, t_dec;
+    char filepath[100];
+    sprintf(filepath, "%s/piso_benchmark_%d_%d_%d.csv",RESULT_PATH, sizes[0], sizes[sizeIndex - 1], iterations);
+    FILE *fp = fopen(filepath, "w");
     fprintf(fp, CSV_HEADER);
 
     // PISO BENCHMARKING
     printf("Running benchmark for PISO...\n");
     for (int i = 0; i < sizeIndex; ++i) {
+
         int size = sizes[i];
         printf("Running benchmark for size %d...\n", size);
         for (int j = 0; j < iterations; ++j) {
@@ -110,6 +99,36 @@ int main(const int argc, char const *argv[]) {
         }
     }
     fclose(fp);
+}
 
-    printf("Benchmarking completed. Results saved to %s and %s\n", filepath, filepath);
+int main(const int argc, char const *argv[]) {
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s <all | piso | proj > <iterations> <sizes 1-5>\n", argv[0]);
+        return 1;
+    }
+    const char* algo = argv[1];
+    int iterations = atoi(argv[2]);
+    int sizeIndex  = atoi(argv[3]);
+
+    gmp_randstate_t state;
+    gmp_randinit_mt(state);
+    gmp_randseed_ui(state, arc4random());
+
+    mpz_t msg, res;
+    mpz_inits(msg, res, NULL);
+    mpz_set_str(msg, "123456", 10);
+
+    if (strcmp(algo, "all") == 0) {
+        printf("Running benchmark for all algorithms...\n");
+        benchmark_proj(iterations, sizeIndex, state, msg, res);
+        benchmark_piso(iterations, sizeIndex, state, msg, res);
+    } else if (strcmp(algo, "piso") == 0) {
+        benchmark_piso(iterations, sizeIndex, state, msg, res);
+    } else if (strcmp(algo, "proj") == 0) {
+        benchmark_proj(iterations, sizeIndex, state, msg, res);
+    } else {
+        fprintf(stderr, "Invalid argument. Use 'all', 'piso' or 'proj'.\n");
+        return 1;
+    }
+
 }
