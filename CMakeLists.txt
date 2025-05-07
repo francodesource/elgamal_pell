@@ -3,10 +3,10 @@ project(elgamal_piso C)
 include(CTest)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "-Wall -Wextra -O3")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Ofast -march=native -funroll-loops")
 
 # Setting result path
-set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results")
+set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results_opt")
 add_compile_definitions(RESULT_PATH="${RESULT_PATH}")
 
 file(GLOB SOURCES  "src/*.c")
