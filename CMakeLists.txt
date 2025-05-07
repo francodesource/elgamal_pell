@@ -3,7 +3,7 @@ project(elgamal_piso C)
 include(CTest)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "-Wall -Wextra -Ofast -march=native -funroll-loops")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Ofast -march=native -funroll-loops -flto")
 
 # Setting result path
 set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results_opt")
