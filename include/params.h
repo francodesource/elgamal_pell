@@ -19,6 +19,8 @@ void param_init(param_t * op);
 
 void param_inits(param_t * first, ...);
 
+void param_clear(param_t * op);
+
 void param_clears(param_t * first, ...);
 
 char* param_get_str(const param_t param);
@@ -39,7 +41,7 @@ void param_op(param_t * rop, const param_t * m1, const param_t * m2, const mpz_t
 
 void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, const mpz_t q);
 
-void mod_more(param_t * rop, const param_t * m, mpz_t e, const mpz_t d, const mpz_t q);
+void mod_more(param_t * rop, const param_t * m, const mpz_t e, const mpz_t d, const mpz_t q);
 
 void param_coord(mpz_t x, mpz_t y, const param_t * m, const mpz_t d, const mpz_t mod);
 #endif //PARAMS_H

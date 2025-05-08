@@ -15,11 +15,13 @@ add_executable(elgamal_piso main.c ${SOURCES})
 add_executable(test_piso test/test_piso.c ${SOURCES})
 add_executable(test_proj test/test_proj.c ${SOURCES})
 add_executable(benchmarks benchmarks.c ${SOURCES})
-
+add_executable(fast fast.c ${SOURCES})
 target_link_libraries(elgamal_piso gmp)
 target_link_libraries(test_piso gmp)
 target_link_libraries(test_proj gmp)
 target_link_libraries(benchmarks gmp)
+target_link_libraries(fast gmp)
+
 
 # test suite
 

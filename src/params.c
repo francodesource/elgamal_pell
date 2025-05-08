@@ -24,6 +24,10 @@ void param_inits(param_t * first, ...) {
     }
 }
 
+void param_clear(param_t * op) {
+    mpz_clear(op->value);
+}
+
 void param_clears(param_t * first, ...) {
     va_list args;
     va_start(args, first);
@@ -179,7 +183,7 @@ void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, co
     mpz_clears(N, D, Nt, Dt, NULL);
 }
 
-void mod_more(param_t * rop, const param_t * m, mpz_t e, const mpz_t d, const mpz_t q) {
+void mod_more(param_t * rop, const param_t * m, const mpz_t e, const mpz_t d, const mpz_t q) {
     if (m->inf) {
         param_set_inf(rop);
         return;
