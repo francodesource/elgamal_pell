@@ -84,7 +84,7 @@ void param_invert(param_t *rop, const param_t *op, const mpz_t mod) {
     mpz_mod(rop->value, rop->value, mod);
 }
 
-void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t d, const mpz_t q) {
+inline void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t d, const mpz_t q) {
     if (m1->inf) {
         param_set_mpz(rop, m2);
         return;
@@ -110,7 +110,7 @@ void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t
     mpz_clear(sum);
 }
 
-void param_op(param_t * rop, const param_t * m1, const param_t * m2, const mpz_t d, const mpz_t q) {
+inline void param_op(param_t * rop, const param_t * m1, const param_t * m2, const mpz_t d, const mpz_t q) {
     // Here m2 can be inf too so we just need to check if m1 is inf
     // else we just run param_op_mpz
 
@@ -123,7 +123,7 @@ void param_op(param_t * rop, const param_t * m1, const param_t * m2, const mpz_t
     param_op_mpz(rop, m1, m2->value, d, q);
 }
 
-void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, const mpz_t q) {
+inline void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, const mpz_t q) {
     mpz_t N, D, Nt, Dt, temp;
     mpz_inits(N, D, Nt, Dt, temp, NULL);
 
@@ -183,7 +183,7 @@ void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, co
     mpz_clears(N, D, Nt, Dt, NULL);
 }
 
-void mod_more(param_t * rop, const param_t * m, const mpz_t e, const mpz_t d, const mpz_t q) {
+inline void mod_more(param_t * rop, const param_t * m, const mpz_t e, const mpz_t d, const mpz_t q) {
     if (m->inf) {
         param_set_inf(rop);
         return;

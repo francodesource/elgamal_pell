@@ -10,6 +10,9 @@
 #include "include/utils.h"
 #include "include/elgamal_piso.h"
 #include "include/elgamal_proj.h"
+#include "include/fast_cipher.h"
+#include "include/fast_keys.h"
+#include "include/fast_piso.h"
 
 #define CSV_HEADER "gen,enc,dec,tot,size,algorithm\n"
 /*
@@ -101,6 +104,48 @@ void benchmark_piso(int iterations, int sizeIndex,  gmp_randstate_t state, mpz_t
     fclose(fp);
 }
 
+void benchmark_piso_fast(int iterations, int sizeIndex,  gmp_randstate_t state, mpz_t msg, mpz_t res) {
+    float start, t_gen, t_enc, t_dec;
+    char filepath[100];
+    sprintf(filepath, "%s/fast_piso_benchmark_%d_%d_%d.csv",RESULT_PATH, sizes[0], sizes[sizeIndex - 1], iterations);
+    FILE *fp = fopen(filepath, "w");
+    fprintf(fp, CSV_HEADER);
+
+    keys_f ks;
+    ciphertext_f ct;
+
+    fast_ciphertext_init(&ct);
+    fast_keys_init(&ks);
+
+
+    // PISO BENCHMARKING
+    printf("Running benchmark for PISO...\n");
+    for (int i = 0; i < sizeIndex; ++i) {
+
+        int size = sizes[i];
+        printf("Running benchmark for size %d...\n", size);
+        for (int j = 0; j < iterations; ++j) {
+
+            start = timer();
+            fast_piso_gen(&ks, size, state);
+            t_gen = timer() - start;
+
+            start = timer();
+            fast_piso_enc(&ct, msg, ks.pk, state);
+            t_enc = timer() - start;
+
+            start = timer();
+            fast_piso_dec(res, &ct, &ks);
+            t_dec = timer() - start;
+
+            assert_eq(msg, res);
+
+            fprintf(fp, "%f,%f,%f,%f,%d,PISO\n", t_gen, t_enc, t_dec, t_gen + t_enc + t_dec, size);
+        }
+    }
+    fclose(fp);
+
+}
 int main(const int argc, char const *argv[]) {
     if (argc != 4) {
         fprintf(stderr, "Usage: %s <all | piso | proj > <iterations> <sizes 1-5>\n", argv[0]);
@@ -120,12 +165,18 @@ int main(const int argc, char const *argv[]) {
 
     if (strcmp(algo, "all") == 0) {
         printf("Running benchmark for all algorithms...\n");
-        benchmark_proj(iterations, sizeIndex, state, msg, res);
-        benchmark_piso(iterations, sizeIndex, state, msg, res);
+        benchmark_proj     (iterations, sizeIndex, state, msg, res);
+        benchmark_piso     (iterations, sizeIndex, state, msg, res);
+        benchmark_piso_fast(iterations, sizeIndex, state, msg, res);
     } else if (strcmp(algo, "piso") == 0) {
         benchmark_piso(iterations, sizeIndex, state, msg, res);
     } else if (strcmp(algo, "proj") == 0) {
         benchmark_proj(iterations, sizeIndex, state, msg, res);
+    } else if (strcmp(algo, "fast") == 0) {
+        benchmark_piso_fast(iterations, sizeIndex, state, msg, res);
+    } else if (strcmp(algo, "piso-f") == 0) {
+        benchmark_piso     (iterations, sizeIndex, state, msg, res);
+        benchmark_piso_fast(iterations, sizeIndex, state, msg, res);
     } else {
         fprintf(stderr, "Invalid argument. Use 'all', 'piso' or 'proj'.\n");
         return 1;

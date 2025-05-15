@@ -18,7 +18,7 @@ int main() {
     keys_f ks;
     fast_keys_init(&ks);
     // generate keys
-    fast_piso_gen(&ks, 1024, state);
+    fast_piso_gen(&ks, 7680, state);
     // print keys
     fast_keys_print(&ks);
 
