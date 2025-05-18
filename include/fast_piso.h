@@ -26,7 +26,7 @@ void fast_piso_gen(keys_f * ks, mp_bitcnt_t n, gmp_randstate_t state);
  * @param state the random state
  * @return the ciphertext
  */
-void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gmp_randstate_t state);
+void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, gmp_randstate_t state);
 
 void fast_piso_dec(mpz_t rop, const ciphertext_f * ct, const keys_f * ks);
 #endif //FAST_PISO_H

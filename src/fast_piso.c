@@ -13,39 +13,32 @@ static unsigned long pd(unsigned long size) {
 }
 
 void fast_piso_gen(keys_f * ks, mp_bitcnt_t n, gmp_randstate_t state) {
-    mpz_t q, d, g, r, p;
-    mpz_inits(q, d, g, r, p, NULL);
-    if (!primes_q_p_d_g_by_size(q, p, d, g, n)) {
+    mpz_t r;
+    mpz_init(r);
+    if (!primes_q_d_g_by_size(ks->pk.q, ks->pk.d, ks->pk.g, n)) {
+        mpz_t p;
+        mpz_init(p);
         // if there are no primes of size n, we generate them
-        rand_prime_q_p(q, p, state, n);
-        smallest_non_square(d, q);
-        rand_primitive_root(g, state, d, q, p);
+        rand_prime_q_p(ks->pk.q, p, state, n);
+        smallest_non_square(ks->pk.d, ks->pk.q);
+        rand_primitive_root(ks->pk.g, state, ks->pk.d, ks->pk.q, p);
+        mpz_clear(p);
     }
-
-    rand_range_ui(ks->sk, state, 2, q);
-    mod_more_mpz(&ks->pk.h, g, ks->sk, d, q);
-
-    mpz_set(ks->pk.q, q);
-    mpz_set(ks->pk.d, d);
-    mpz_set(ks->pk.g, g);
-
+    rand_range_ui(ks->sk, state, 2, ks->pk.q);
+    mod_more_mpz(&ks->pk.h, ks->pk.g, ks->sk, ks->pk.d, ks->pk.q);
     // freeing memory
-    mpz_clears(q, d, g, p, r, NULL);
+    mpz_clear(r);
 }
 
-void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gmp_randstate_t state) {
+void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, gmp_randstate_t state) {
 
-    mpz_t q, d, d1, g, x, y, m, r,  s, tmp;
-    mpz_inits(q, d, d1, g, x, y, m, r, s, tmp, NULL);
-
-    mpz_set(q, pk.q);
-    mpz_set(d, pk.d);
-    mpz_set(g, pk.g);
-
+    mpz_t x, y, m, r,  s, tmp;
+    mpz_inits(x, y, m, r, s, tmp, NULL);
 
     // computing padding value
-    const unsigned long q_bits = mpz_sizeinbase(pk.q, 2);
+    const unsigned long q_bits = mpz_sizeinbase(pk->q, 2);
     const unsigned long pad = pd(q_bits);
+
     // check if message has correct size
     if (mpz_sizeinbase(msg, 2) > 2 * (q_bits - 1) - pad) {
         perror("Error: message is too long\n");
@@ -59,10 +52,10 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
     // finding a suitable d
     bool found = false;
     for (unsigned long int j = 0; j < pad; j++) {
-        mpz_mul(d1, x, x);
-        mpz_sub_ui(d1, d1, 1);
-        mpz_mod(d1, d1, q);
-        if (mpz_jacobi(d1, q) == -1) {
+        mpz_mul(ct->d, x, x);
+        mpz_sub_ui(ct->d, ct->d, 1);
+        mpz_mod(ct->d, ct->d, pk->q);
+        if (mpz_jacobi(ct->d, pk->q) == -1) {
             found = true;
             break;
         }
@@ -84,67 +77,64 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
     // bisogna sottrarre uno anche in fase di decryption
 
     // Handling case where y is not invertible
-    mpz_invert(y, y, pk.q);
+    mpz_invert(y, y, pk->q);
     //  setting d
-    mpz_powm_ui(tmp, y, 2, pk.q); // tmp <- y^2
-    mpz_mul(d1, d1, tmp);
-    mpz_mod(d1, d1, q); // d1 <- (x^2 - 1) / y^2
+    mpz_powm_ui(tmp, y, 2, pk->q); // tmp <- y^2
+    mpz_mul(ct->d, ct->d, tmp);
+    mpz_mod(ct->d, ct->d, pk->q); // d1 <- (x^2 - 1) / y^2
 
     // setting m
     mpz_add_ui(m, x, 1);
     mpz_mul(m, m, y);
-    mpz_mod(m, m, q);
+    mpz_mod(m, m, pk->q);
 
     // setting s
-    mpz_invert(tmp, d, q);
-    mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
-    mpz_mod(tmp, tmp, q);
+    mpz_invert(tmp, pk->d, pk->q);
+    mpz_mul(tmp, tmp, ct->d); // tmp <- d^-1 * d1
+    mpz_mod(tmp, tmp, pk->q);
 
-    sqrt_m(s, tmp, q);
+    sqrt_m(s, tmp, pk->q);
 
     // setting random exponent r
-    rand_range_ui(r, state, 2, q);
+    rand_range_ui(r, state, 2, pk->q);
 
     // setting c1
-    mpz_mul(tmp, g, s);
-    mpz_mod(tmp, tmp, q);
-    mod_more_mpz(&ct->c1, tmp, r, d1, q);
+    mpz_mul(tmp, pk->g, s);
+    mpz_mod(tmp, tmp, pk->q);
+    mod_more_mpz(&ct->c1, tmp, r, ct->d, pk->q);
 
-    if (pk.h.inf) {
+    if (pk->h.inf) {
         fprintf(stderr, "Error: h is infinite\n");
         exit(EXIT_FAILURE);
     }
     // setting c2
-    mpz_mul(tmp, pk.h.value, s);
-    mpz_mod(tmp, tmp, q);
-    mod_more_mpz(&ct->c2, tmp, r, d1,q);
-    param_op_mpz(&ct->c2, &ct->c2, m, d1, q);
+    mpz_mul(tmp, pk->h.value, s);
+    mpz_mod(tmp, tmp, pk->q);
+    mod_more_mpz(&ct->c2, tmp, r, ct->d,pk->q);
+    param_op_mpz(&ct->c2, &ct->c2, m, ct->d, pk->q);
 
-    mpz_set(ct->d, d1);
     // freeing memory
-    mpz_clears(q, d, d1, g, x, y, m, s, r, tmp, NULL);
+    mpz_clears(x, y, m, s, r, tmp, NULL);
 }
 
 void fast_piso_dec(mpz_t rop, const ciphertext_f *ct, const keys_f * ks) {
 
-    mpz_t q, d1, x, y;
-    mpz_inits(q, d1, x, y, NULL);
+    mpz_t x, y;
+    mpz_inits(x, y, NULL);
 
-    mpz_set(q, ks->pk.q);
-    mpz_set(d1, ct->d);
     param_t m;
     param_init(&m);
-    unsigned long n = mpz_sizeinbase(q, 2);
-    unsigned long pad = pd(n);
+    const unsigned long n = mpz_sizeinbase(ks->pk.q, 2);
+    const unsigned long pad = pd(n);
 
-    mod_more(&m, &ct->c1, ks->sk, d1, q);
-    param_invert(&m, &m, q);
-    param_op(&m, &m, &ct->c2, d1, q); // (-c1^sk) * c2
+    mod_more(&m, &ct->c1, ks->sk, ct->d, ks->pk.q);
+    param_invert(&m, &m, ks->pk.q);
+    param_op(&m, &m, &ct->c2, ct->d, ks->pk.q); // (-c1^sk) * c2
 
-    param_coord(x, y, &m, d1, q);
+    param_coord(x, y, &m, ct->d, ks->pk.q);
     mpz_tdiv_q_2exp(x, x, pad);
     mpz_mul_2exp(rop, x, n - 1);
     mpz_sub_ui(y, y, 1);
     mpz_add(rop, rop, y);
-    mpz_clears(q, d1, x, y, NULL);
+    mpz_clears(x, y, NULL);
 }
