@@ -74,35 +74,30 @@ bool primes_q_p_by_size(mpz_t q, mpz_t p, const mp_bitcnt_t size) {
     return true;
 }
 
-bool primes_q_p_d_g_by_size(mpz_t q, mpz_t p, mpz_t d, mpz_t g, const mp_bitcnt_t size) {
+bool primes_q_d_g_by_size(mpz_t q, mpz_t d, mpz_t g, const mp_bitcnt_t size) {
     switch (size) {
         case 512:
             mpz_set_str(q, PQ_CON._512[0], BASE);
-            mpz_set_str(p, PQ_CON._512[1], BASE);
             mpz_set_str(d, PQ_CON._512[2], BASE);
             mpz_set_str(g, PQ_CON._512[3], BASE);
         break;
         case 1024:
             mpz_set_str(q, PQ_CON._1024[0], BASE);
-            mpz_set_str(p, PQ_CON._1024[1], BASE);
             mpz_set_str(d, PQ_CON._1024[2], BASE);
             mpz_set_str(g, PQ_CON._1024[3], BASE);
         break;
         case 1536:
             mpz_set_str(q, PQ_CON._1536[0], BASE);
-            mpz_set_str(p, PQ_CON._1536[1], BASE);
             mpz_set_str(d, PQ_CON._1536[2], BASE);
             mpz_set_str(g, PQ_CON._1536[3], BASE);
         break;
         case 3840:
             mpz_set_str(q, PQ_CON._3840[0], BASE);
-            mpz_set_str(p, PQ_CON._3840[1], BASE);
             mpz_set_str(d, PQ_CON._3840[2], BASE);
             mpz_set_str(g, PQ_CON._3840[3], BASE);
         break;
         case 7680:
             mpz_set_str(q, PQ_CON._7680[0], BASE);
-            mpz_set_str(p, PQ_CON._7680[1], BASE);
             mpz_set_str(d, PQ_CON._7680[2], BASE);
             mpz_set_str(g, PQ_CON._7680[3], BASE);
         break;
