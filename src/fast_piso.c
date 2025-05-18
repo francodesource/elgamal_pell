@@ -15,12 +15,12 @@ static unsigned long pd(unsigned long size) {
 void fast_piso_gen(keys_f * ks, mp_bitcnt_t n, gmp_randstate_t state) {
     mpz_t q, d, g, r, p;
     mpz_inits(q, d, g, r, p, NULL);
-    if (!primes_q_p_by_size(q, p, n)) {
+    if (!primes_q_p_d_g_by_size(q, p, d, g, n)) {
         // if there are no primes of size n, we generate them
         rand_prime_q_p(q, p, state, n);
+        smallest_non_square(d, q);
+        rand_primitive_root(g, state, d, q, p);
     }
-    smallest_non_square(d, q);
-    rand_primitive_root(g, state, d, q, p);
 
     rand_range_ui(ks->sk, state, 2, q);
     mod_more_mpz(&ks->pk.h, g, ks->sk, d, q);
@@ -84,10 +84,7 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
     // bisogna sottrarre uno anche in fase di decryption
 
     // Handling case where y is not invertible
-    if (mpz_invert(y, y, pk.q) == 0) { // y <- y^-1
-        gmp_fprintf(stderr, "Error: y (%Zd) is not invertible\n",y);
-        exit(EXIT_FAILURE);
-    }
+    mpz_invert(y, y, pk.q);
     //  setting d
     mpz_powm_ui(tmp, y, 2, pk.q); // tmp <- y^2
     mpz_mul(d1, d1, tmp);
@@ -98,9 +95,6 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
     mpz_mul(m, m, y);
     mpz_mod(m, m, q);
 
-    // setting random exponent r
-    rand_range_ui(r, state, 2, q);
-
     // setting s
     mpz_invert(tmp, d, q);
     mpz_mul(tmp, tmp, d1); // tmp <- d^-1 * d1
@@ -108,7 +102,10 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
 
     sqrt_m(s, tmp, q);
 
-    // setting c1 & c2
+    // setting random exponent r
+    rand_range_ui(r, state, 2, q);
+
+    // setting c1
     mpz_mul(tmp, g, s);
     mpz_mod(tmp, tmp, q);
     mod_more_mpz(&ct->c1, tmp, r, d1, q);
@@ -117,7 +114,7 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f pk, gm
         fprintf(stderr, "Error: h is infinite\n");
         exit(EXIT_FAILURE);
     }
-
+    // setting c2
     mpz_mul(tmp, pk.h.value, s);
     mpz_mod(tmp, tmp, q);
     mod_more_mpz(&ct->c2, tmp, r, d1,q);
