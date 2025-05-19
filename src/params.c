@@ -39,7 +39,6 @@ void param_clears(param_t * first, ...) {
     }
 }
 
-
 char* param_get_str(const param_t param) {
     if (param.inf) {
         return "inf";
@@ -85,66 +84,59 @@ void param_invert(param_t *rop, const param_t *op, const mpz_t mod) {
 }
 
 inline void param_op_mpz(param_t * rop, const param_t * m1, const mpz_t m2, const mpz_t d, const mpz_t q) {
-    if (m1->inf) {
+    if (!m1->inf) {
+        mpz_t sum;
+        mpz_init(sum);
+        mpz_add(sum, m1->value, m2);
+        mpz_mod(sum, sum, q);
+
+        if (mpz_cmp_ui(sum, 0) != 0){
+            // rop <- (m1 * m2 + d) / (m1 + m2)
+            rop->inf = false;
+            mpz_invert(sum, sum, q);
+            mpz_mul(rop->value, m1->value, m2);
+            mpz_add(rop->value, rop->value, d);
+            mpz_mod(rop->value, rop->value, q);
+
+            mpz_mul(rop->value, rop->value, sum);
+            mpz_mod(rop->value, rop->value, q);
+        } else {
+            param_set_inf(rop);
+        }
+        mpz_clear(sum);
+    }else {
         param_set_mpz(rop, m2);
-        return;
     }
-
-    mpz_t sum;
-    mpz_init(sum);
-    mpz_add(sum, m1->value, m2);
-    mpz_mod(sum, sum, q);
-
-    if (mpz_cmp_ui(sum, 0) != 0) {
-        rop->inf = false;
-        mpz_invert(sum, sum, q);
-        mpz_mul(rop->value, m1->value, m2);
-        mpz_add(rop->value, rop->value, d);
-        mpz_mul(rop->value, rop->value, sum);
-        mpz_mod(rop->value, rop->value, q);
-
-    } else {
-        param_set_inf(rop);
-    }
-
-    mpz_clear(sum);
 }
 
 inline void param_op(param_t * rop, const param_t * m1, const param_t * m2, const mpz_t d, const mpz_t q) {
     // Here m2 can be inf too so we just need to check if m1 is inf
     // else we just run param_op_mpz
-
     if (m2->inf) {
         param_set(rop, m1);
         return;
     }
-
     // Here we know that m2 is not inf
     param_op_mpz(rop, m1, m2->value, d, q);
 }
 
-inline void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, const mpz_t q) {
-    mpz_t N, D, Nt, Dt, temp;
-    mpz_inits(N, D, Nt, Dt, temp, NULL);
+inline void mod_more_mpz_small_d(param_t * rop, const mpz_t m, const mpz_t e, const ulong d, const mpz_t q) {
+    mpz_t N, D, Nt, Dt;
+    mpz_inits(N, D, Nt, Dt, NULL);
 
     mpz_set_ui(N, 1);
     mpz_set_ui(D, 0);
 
     for (int i = mpz_sizeinbase(e, 2); i >= 0; --i) {
         const int bit = mpz_tstbit(e, i);
-
-        // saving values of N and D
+        // saving values of N
         mpz_set(Nt, N);
         mpz_set(Dt, D);
-
         // N' = N^2 + dD^2 in F_q
         mpz_pow_ui(D, Dt, 2);
-        mpz_mul(D, D, d);
         mpz_pow_ui(N, Nt, 2);
-
-        mpz_add(N, N, D);
+        mpz_addmul_ui(N, D, d);
         mpz_mod(N, N, q);
-
         // D' = 2ND in F_q
         mpz_mul(D, Dt, Nt);
         mpz_mul_ui(D, D, 2);
@@ -153,27 +145,78 @@ inline void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_
         if (bit == 1) {
             // saving values of N and D
             mpz_set(Nt, N);
-            mpz_set(Dt, D);
-
             //N' = Nm + dD in F_q
-            mpz_mul(D, Dt, d);
             mpz_mul(N, Nt, m);
-            mpz_add(N, N, D);
+            mpz_addmul_ui(N, D, d);
             mpz_mod(N, N, q);
 
             //D' = N + Dm in F_q
-            mpz_mul(D, Dt, m);
-            mpz_add(D, Nt, D);
-            mpz_mod(D, D, q);
+            mpz_addmul(Nt, D, m);
+            mpz_mod(D, Nt, q);
         }
     }
-    mpz_gcdext(Nt, Dt, temp, D, q);
+    mpz_gcdext(Nt, Dt, NULL, D, q);
     mpz_mod(Dt, Dt, q);
 
     if (mpz_cmp_ui(Nt, 1) == 0) {
         rop->inf = false;
-        mpz_mul(temp, Dt, N);
-        mpz_mod(rop->value, temp, q);
+        mpz_mul(N, Dt, N);
+        mpz_mod(rop->value, N, q);
+    } else if (mpz_cmp(Nt, q) != 0) {
+        gmp_fprintf(stderr, "%Zd is a factor of n", Nt);
+        exit(EXIT_FAILURE);
+    } else {
+        param_set_inf(rop);
+    }
+    mpz_clears(N, D, Nt, Dt, NULL);
+}
+
+inline void mod_more_mpz(param_t * rop, const mpz_t m, const mpz_t e, const mpz_t d, const mpz_t q) {
+    if (mpz_fits_ulong_p(d)) {
+        mod_more_mpz_small_d(rop, m, e, mpz_get_ui(d), q);
+        return;
+    }
+    mpz_t N, D, Nt, Dt;
+    mpz_inits(N, D, Nt, Dt, NULL);
+
+    mpz_set_ui(N, 1);
+    mpz_set_ui(D, 0);
+
+    for (int i = mpz_sizeinbase(e, 2); i >= 0; --i) {
+        const int bit = mpz_tstbit(e, i);
+        // saving values of N
+        mpz_set(Nt, N);
+        mpz_set(Dt, D);
+        // N' = N^2 + dD^2 in F_q
+        mpz_pow_ui(D, Dt, 2);
+        mpz_pow_ui(N, Nt, 2);
+        mpz_addmul(N, D, d);
+        mpz_mod(N, N, q);
+        // D' = 2ND in F_q
+        mpz_mul(D, Dt, Nt);
+        mpz_mul_ui(D, D, 2);
+        mpz_mod(D, D, q);
+
+        if (bit == 1) {
+            // saving values of N and D
+            mpz_set(Nt, N);
+            //N' = Nm + dD in F_q
+            mpz_mul(N, Nt, m);
+            mpz_addmul(N, D, d);
+            mpz_mod(N, N, q);
+
+            //D' = N + Dm in F_q
+            mpz_addmul(Nt, D, m);
+            mpz_mod(D, Nt, q);
+        }
+    }
+    mpz_gcdext(Nt, Dt, NULL, D, q);
+    mpz_mod(Dt, Dt, q);
+
+    if (mpz_cmp_ui(Nt, 1) == 0) {
+        rop->inf = false;
+        mpz_mul(N, Dt, N);
+        mpz_mod(rop->value, N, q);
     } else if (mpz_cmp(Nt, q) != 0) {
         gmp_fprintf(stderr, "%Zd is a factor of n", Nt);
         exit(EXIT_FAILURE);
