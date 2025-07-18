@@ -2,3 +2,7 @@ cmake-build-debug
 main
 .idea
 gmp-6.3.0
+results
+benchmarks
+results_opt
+results_w
