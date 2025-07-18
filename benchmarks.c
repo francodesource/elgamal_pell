@@ -131,7 +131,7 @@ void benchmark_piso_fast(int iterations, int sizeIndex,  gmp_randstate_t state, 
             t_gen = timer() - start;
 
             start = timer();
-            fast_piso_enc(&ct, msg, ks.pk, state);
+            fast_piso_enc(&ct, msg, &ks.pk, state);
             t_enc = timer() - start;
 
             start = timer();
@@ -181,5 +181,7 @@ int main(const int argc, char const *argv[]) {
         fprintf(stderr, "Invalid argument. Use 'all', 'piso' or 'proj'.\n");
         return 1;
     }
+
+    return 0;
 
 }

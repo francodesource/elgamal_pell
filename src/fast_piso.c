@@ -31,7 +31,6 @@ void fast_piso_gen(keys_f * ks, mp_bitcnt_t n, gmp_randstate_t state) {
 }
 
 void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, gmp_randstate_t state) {
-
     mpz_t x, y, m, r,  s, tmp;
     mpz_inits(x, y, m, r, s, tmp, NULL);
 
@@ -49,6 +48,7 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, 
     mpz_tdiv_q_2exp(x, msg, q_bits - 1);
     // padding the message
     mpz_mul_2exp(x, x, pad);
+
     // finding a suitable d
     bool found = false;
     for (unsigned long int j = 0; j < pad; j++) {
@@ -67,7 +67,7 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, 
         perror("Error: non square d found\n");
         exit(EXIT_FAILURE);
     }
-        // setting y <- msg % (n - 1) + 1
+    // setting y <- msg % (n - 1) + 1
     mpz_tdiv_r_2exp(y, msg, q_bits - 1);
     mpz_add_ui(y, y, 1);
 
@@ -95,7 +95,6 @@ void fast_piso_enc(ciphertext_f * ct, const mpz_t msg, const public_key_f * pk, 
 
     sqrt_m(s, tmp, pk->q);
 
-    // setting random exponent r
     rand_range_ui(r, state, 2, pk->q);
 
     // setting c1
