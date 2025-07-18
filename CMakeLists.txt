@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "-O3 -march=native -funroll-loops -ffast-math")
 
 # Setting result path
-set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results_opt")
+set(RESULT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/results_w")
 add_compile_definitions(RESULT_PATH="${RESULT_PATH}")
 
 file(GLOB SOURCES  "src/*.c")
@@ -16,15 +16,19 @@ add_executable(test_piso test/test_piso.c ${SOURCES})
 add_executable(test_proj test/test_proj.c ${SOURCES})
 add_executable(benchmarks benchmarks.c ${SOURCES})
 add_executable(fast fast.c ${SOURCES})
+add_executable(mod_more_test test/mod_more_test.c ${SOURCES})
+
 target_link_libraries(elgamal_piso gmp)
 target_link_libraries(test_piso gmp)
 target_link_libraries(test_proj gmp)
 target_link_libraries(benchmarks gmp)
 target_link_libraries(fast gmp)
+target_link_libraries(mod_more_test gmp)
+
 
 
 # test suite
-
+add_test(NAME testModMore COMMAND mod_more_test)
 # PROJ
 add_test(NAME testProjGED8    COMMAND test_proj 8 10000)
 add_test(NAME testProjGED16   COMMAND test_proj 16 10000)
